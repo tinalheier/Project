@@ -17,7 +17,7 @@ MASK_ELEVATION = 45
 
 @app.route("/")
 def index():
-    # Laster bare HTML-en
+    
     return render_template("index.html")
 
 @app.route("/skyplot-data")
