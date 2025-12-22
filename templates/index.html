@@ -1,0 +1,176 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>GNSS Skyplot</title>
+    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+    <style>
+        body {
+            font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+            margin: 20px;
+        }
+        #plot {
+            width: 80%;
+            max-width: 900px;
+            height: 600px;
+            margin-bottom: 20px;
+        }
+        #controls {
+            margin-bottom: 10px;
+        }
+        #sat-list {
+            white-space: pre-wrap;
+            border-top: 1px solid #ccc;
+            padding-top: 10px;
+            max-width: 900px;
+        }
+    </style>
+</head>
+<body>
+    <h1>GNSS Skyplot</h1>
+    <div id="meta"></div>
+
+    <div id="controls">
+        <label>
+            <input type="checkbox" id="toggle_gps" checked>
+            GPS (G)
+        </label>
+        <label style="margin-left: 1rem;">
+            <input type="checkbox" id="toggle_galileo" checked>
+            Galileo (E)
+        </label>
+        <label style="margin-left: 1rem;">
+            <input type="checkbox" id="toggle_beidou" checked>
+            BeiDou (C)
+        </label>
+    </div>
+
+    <div id="plot"></div>
+    <div id="sat-list"></div>
+
+    <script>
+        fetch("/skyplot-data")
+            .then(response => response.json())
+            .then(data => {
+                const gps = data.GPS;
+                const gal = data.Galileo;
+                const bei = data.Beidou;
+                const maskElevation = data.maskElevation;  
+                const maskCircleRadius = 90 - maskElevation
+                const thetaCircle = [];
+for (let t = 0; t <= 360; t += 1) {
+    thetaCircle.push(t);
+}
+
+const rCircle = thetaCircle.map(() => maskCircleRadius);
+
+const maskElevationCircle = {
+    type: "scatterpolar",
+    r: rCircle,
+    theta: thetaCircle,
+    mode: "lines",
+    marker: { color: "red", size: 9 },
+    line: { dash: "dash" },
+    name: `Mask elevation (${maskElevation}°)`,
+    hoverinfo: "skip"
+};
+                const traceGPS = {
+                    type: "scatterpolar",
+                    mode: "markers+text",
+                    name: "GPS (G)",
+                    theta: gps.az_deg,          
+                    r: gps.zenith,   
+                    text: gps.sat,   
+                    textposition: "top center",
+                    marker: { color: "blue", size: 8 },
+                    textfont: { color: "black", size: 10 },
+                    customdata: gps.zenith.map(z => (90-z).toFixed(2)),
+                    hovertemplate: "SatID: %{text}<br>" + "Azimuth: %{theta}<br>" + "Elevation: %{customdata}°<extra></extra>",
+                    visible: true
+                };
+
+                const traceGal = {
+                    type: "scatterpolar",
+                    mode: "markers+text",
+                    name: "Galileo (E)",
+                    theta: gal.az_deg,
+                    r: gal.zenith,
+                    text: gal.sat,
+                    textposition: "top center",
+                    marker: { color: "orange", size: 8 },
+                    textfont: { color: "black", size: 10 },
+                    customdata: gal.zenith.map(z => (90-z).toFixed(2)),
+                    hovertemplate: "SatID: %{text}<br>" + "Azimuth: %{theta}<br>" + "Elevation: %{customdata}°<extra></extra>",
+                    visible: true
+                };
+
+                const traceBei = {
+                    type: "scatterpolar",
+                    mode: "markers+text",
+                    name: "BeiDou (C)",
+                    theta: bei.az_deg,
+                    r: bei.zenith,
+                    text: bei.sat,
+                    textposition: "top center",
+                    marker: { color: "green", size: 8 },
+                    textfont: { color: "black", size: 10 },
+                    customdata: bei.zenith.map(z => (90-z).toFixed(2)),
+                    hovertemplate: "SatID: %{text}<br>" + "Azimuth: %{theta}<br>" + "Elevation: %{customdata}°<extra></extra>",
+                    visible: true
+                };
+
+                const layout = {
+                    title: "Skyplot",
+                    polar: {
+                        radialaxis: {
+                            range: [0, 90],
+                            angle: 90,
+                            tickvals: [0, 30, 60, 90],
+                            ticktext: ["90°", "60°", "30°", "0°"]
+                        },
+                        angularaxis: {
+                            direction: "clockwise",
+                            rotation: 90, 
+                            tickvals: [0, 90, 180, 270],
+                            ticktext: ["360° / 0° N", "90° E", "180° S", "270° W"]
+                        }
+                    },
+                    showlegend: true
+                };
+
+                Plotly.newPlot("plot", [traceGPS, traceGal, traceBei, maskElevationCircle], layout);
+
+                const metaDiv = document.getElementById("meta");
+                metaDiv.textContent = `Available satellites: ${data.date} at time: ${data.time}`;
+
+                const satListDiv = document.getElementById("sat-list");
+                const satText =
+                    `Available satellites: ${data.date} at time: ${data.time}:\n` +
+                    `${gps.sat.length} GPS satellites, ${gal.sat.length} Galileo satellites, and ${bei.sat.length} Beidou satellites.\n\n` +
+                    `GPS (G): ${gps.sat.join(", ")}\n` +
+                    `Galileo (E): ${gal.sat.join(", ")}\n` +
+                    `BeiDou (C): ${bei.sat.join(", ")}`;
+                satListDiv.textContent = satText;
+
+                const toggleGPS = document.getElementById("toggle_gps");
+                const toggleGal = document.getElementById("toggle_galileo");
+                const toggleBei = document.getElementById("toggle_beidou");
+
+                toggleGPS.addEventListener("change", () => {
+                    Plotly.restyle("plot", {visible: toggleGPS.checked}, [0]);
+                });
+
+                toggleGal.addEventListener("change", () => {
+                    Plotly.restyle("plot", {visible: toggleGal.checked}, [1]);
+                });
+
+                toggleBei.addEventListener("change", () => {
+                    Plotly.restyle("plot", {visible: toggleBei.checked}, [2]);
+                });
+            })
+            .catch(err => {
+                console.error("Feil ved henting av skyplot-data:", err);
+            });
+    </script>
+</body>
+</html>
