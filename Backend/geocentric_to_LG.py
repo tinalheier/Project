@@ -1,5 +1,5 @@
-from position_WGS84 import find_satellites
-from emphererides_file import read_rinex_file
+from Backend.position_WGS84 import find_satellites
+from Backend.emphererides_file import read_rinex_file
 
 import numpy as np
 

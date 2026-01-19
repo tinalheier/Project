@@ -1,5 +1,5 @@
 import numpy as np
-from geocentric_to_LG import azimuth_and_zenith
+from Backend.geocentric_to_LG import azimuth_and_zenith
 
 def unpack_results(results):
     satellites = [r[0] for r in results]
