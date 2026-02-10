@@ -1,5 +1,5 @@
 import numpy as np
-from Backend.emphererides_file import read_rinex_file
+from emphererides_file import read_rinex_file
 import datetime
 import pandas as pd
 

@@ -6,8 +6,10 @@ from rasterio.windows import from_bounds
 import math
 from rasterio.transform import rowcol
 
-DTM_trd = rasterio.open('Backend/data/DTM_trd.tif')
-#DSM_trd= rasterio.open('Backend/data/DSM_trd.tif')
+
+
+tf = Transformer.from_crs("EPSG:25833", "EPSG:4978", always_xy=True)
+
 
 #Se om punktet er innenfor rasteren
 def point_inside_raster(src, x, y) -> bool:
@@ -50,12 +52,11 @@ def max_azimuth(distances, data, transform, Ax, Ay, zA, azimuth):
 
 
 
-def horizon_mask_360(pointA, az_step, buffer, step):
+def horizon_mask_360(src, pointA, az_step, buffer, step):
 
-    results = []
+    results = {}
     distances = np.arange(step, buffer + step, step)
 
-    src = DTM_trd
     Ax, Ay, zA = pointA
 
     window = from_bounds(
@@ -69,20 +70,28 @@ def horizon_mask_360(pointA, az_step, buffer, step):
     data = src.read(1, window=window)
     transform = src.window_transform(window)
 
+    # coord_ECEF = tf.transform(Ax, Ay, zA)
+
     for az in np.arange(0, 360, az_step):
-
         res = max_azimuth(distances, data, transform, Ax, Ay, zA, az)
-        results.append(res)
+        
+        results[az] = res
+        #, coord_ECEF
 
-    return results
+    return results 
 
 
 
 
-#testing
+
+
+# testing
+
+src = rasterio.open('Backend/data/DTM_trd.tif')       
+
+point_testA= 270239.58,7040945.2, 20 #samf
 # point_testA= [10.3817288, 63.4144650] #longitude, latitude
 # point_testB= [10.3707799, 63.4176188] #longitude, latitude, nb, dette funker ikke, pga utm
 
-# print(select_raster_in_buffer(100, point_testA,point_testB, 2))
 
-# print(horizon_mask_360(point_testA, 4, 5000, 10))
+# print(horizon_mask_360(src, point_testA, 4, 5000, 10))

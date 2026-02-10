@@ -5,8 +5,7 @@ from shapely.geometry import MultiLineString
 import numpy as np
 
 
-# Finner veglenkesekvenser mellom start og sluttpunkt
-
+# Finner veglenkesekvenser mellom gitt start og sluttpunkt
 
 def hent_veglenkesekvenser_rute(startpunkt, sluttpunkt): #utm33 koord
 
@@ -36,7 +35,7 @@ def hent_veglenkesekvenser_rute(startpunkt, sluttpunkt): #utm33 koord
 
     data = r.json()
 
-    #Hente pos til alle segmenter og gjør de til shapely LineStrings
+    #Hente posisjoner til alle segmenter og gjør de til shapely LineStrings
     lines = []
 
     segments = data["vegnettsrutesegmenter"]
@@ -57,7 +56,7 @@ def hent_veglenkesekvenser_rute(startpunkt, sluttpunkt): #utm33 koord
     return merged_road
 
 
-#Dele veilinjen i masse ulike deler, med 10m avstand og får koord i x,yz 
+#Dele veilinjen i masse ulike deler, med step som avstand og får koord i x,y z UTM33
 def dele_veilinje(startpunkt, sluttpunkt, step):
     
     veglinje = hent_veglenkesekvenser_rute(startpunkt, sluttpunkt)
