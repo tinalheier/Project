@@ -1,15 +1,16 @@
 from position_WGS84 import find_satellites
 from emphererides_file import read_rinex_file
-
+from pyproj import Transformer
 import numpy as np
 
 a = 6378137 
 b = 6356752.3141
 e_2nd = (a**2-b**2)/a**2
 
+ecef_to_llh = Transformer.from_crs("EPSG:4978", "EPSG:4326",always_xy=True)
+
 
 def azimuth_and_zenith(empherids, date, observation_time, receiverCartesianPos, maskElevation):
-
     results_GPS = []
     results_Galileo = []
     results_Beidou = []
@@ -24,11 +25,12 @@ def azimuth_and_zenith(empherids, date, observation_time, receiverCartesianPos, 
     satellites_Galileo = find_satellites(empheridesfile_Galileo, date, observation_time)
     satellites_Beidou = find_satellites(empheridesfile_Beidou, date, observation_time)
 
+    lat,long,h = ecef_to_llh.transform(receiverCartesianPos[0], receiverCartesianPos[1], receiverCartesianPos[2])
+    latlong_receiver = (lat,long,h)
     for index, row in satellites_GPS.iterrows():
 
         sat_pos = row["satellitePosition"]
         distance_sat_receiver = baseline(sat_pos, receiverCartesianPos)
-        latlong_receiver = xyz_to_latlong_receiver(receiverCartesianPos)
         LG = local_coordinates(distance_sat_receiver, latlong_receiver)
         zenith = float(zentih_angle(LG)* 180/np.pi) #degree
         
@@ -45,9 +47,6 @@ def azimuth_and_zenith(empherids, date, observation_time, receiverCartesianPos, 
 
 
         distance_sat_receiver = baseline(sat_pos, receiverCartesianPos)
-
-        latlong_receiver = xyz_to_latlong_receiver(receiverCartesianPos)
-
         LG = local_coordinates(distance_sat_receiver, latlong_receiver)
 
         
@@ -65,9 +64,6 @@ def azimuth_and_zenith(empherids, date, observation_time, receiverCartesianPos, 
 
 
         distance_sat_receiver = baseline(sat_pos, receiverCartesianPos)
-
-        latlong_receiver = xyz_to_latlong_receiver(receiverCartesianPos)
-
         LG = local_coordinates(distance_sat_receiver, latlong_receiver)
 
         
@@ -86,42 +82,6 @@ def baseline(satellite_coord, receiver_coord):
     baseline = satellite_coord - receiver_coord
     return baseline
 
-
-def xyz_to_latlong_receiver(receiver_coord):
-    p = np.sqrt(receiver_coord[0]**2 + receiver_coord[1]**2)
-
-    phi_0 = np.arctan(receiver_coord[2]/(p*(1-e_2nd)))
-
-    N_0 = a**2/np.sqrt(a**2*np.cos(phi_0)**2 + (b**2*np.sin(phi_0)**2))
-
-    h = (p / np.cos(phi_0)) - N_0
-
-    phi_improved = np.arctan(receiver_coord[2] / (p *(1-(e_2nd*(N_0/(N_0+h)))))) 
-
-    longitude = np.arctan(receiver_coord[1]/receiver_coord[0])
-
-    if phi_0 == phi_improved:
-        return float(phi_improved), float(longitude)
-    
-    else: return inverse_transformation_step(phi_improved, p, receiver_coord)
-
-
-#Helper function to xyz_to_latlong_receiver, iteration
-def inverse_transformation_step(phi_improved, p, receiver_coord):
-    ReceiverX, ReceiverY, ReceiverZ = receiver_coord
-    phi_0 = phi_improved
-    N_0 = a**2/np.sqrt(a**2*np.cos(phi_0)**2 + (b**2*np.sin(phi_0)**2))
-    h = (p/np.cos(phi_0)) - N_0
-
-    phi_improved = np.arctan(ReceiverZ / (p *(1-(e_2nd*(N_0/(N_0+h))))))
-    
-    longitude = np.arctan(ReceiverY/ReceiverX)
-    if phi_0 == phi_improved:
-        
-        return float(phi_improved), float(longitude)
-    
-    else: return inverse_transformation_step(phi_improved, p, receiver_coord)
-    
 
 def T_matrix(latitude, longitude):
     long = longitude 
