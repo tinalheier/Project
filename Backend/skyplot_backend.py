@@ -1,6 +1,6 @@
 import numpy as np
-from Backend.geocentric_to_LG import azimuth_and_zenith
-from Backend.sat_with_terrain import find_max_elev_horizon_360
+from geocentric_to_LG import azimuth_and_zenith
+from sat_with_terrain import find_max_elev_horizon_360
 
 def unpack_results(results):
     satellites = [r[0] for r in results]

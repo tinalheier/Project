@@ -119,12 +119,12 @@ def zentih_angle(local_coordinates):
 
 
 
-TEXTFILE = "BRDC00IGS_R_20251260000_01D_MN.rnx" #Endre denne hvis filvei endres
-DATE = "20250506"
-OBS_TIME = "033000"
-RECEIVER_COORD = np.array([3146294.9, 595984.2, 5491077.6])
+# TEXTFILE = "BRDC00IGS_R_20251260000_01D_MN.rnx" #Endre denne hvis filvei endres
+# DATE = "20250506"
+# OBS_TIME = "033000"
+# RECEIVER_COORD = np.array([3146294.9, 595984.2, 5491077.6])
 
-MASK_ELEVATION = 45
+# MASK_ELEVATION = 45
 
 
-# print(azimuth_and_zenith(TEXTFILE, DATE, OBS_TIME, RECEIVER_COORD, MASK_ELEVATION))
+# # print(azimuth_and_zenith(TEXTFILE, DATE, OBS_TIME, RECEIVER_COORD, MASK_ELEVATION))

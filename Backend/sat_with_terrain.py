@@ -108,22 +108,22 @@ def last(startpunkt, sluttpunkt, textfile, date, obs_time):
 
     return result
 
-# #TRD
-# startpunkt = 270353.68,7040091.61 
-# sluttpunkt = 270386.58,7039786.7
+# # #TRD
+# # startpunkt = 270353.68,7040091.61 
+# # sluttpunkt = 270386.58,7039786.7
 
-#Lærdal
-startpunkt = 49379.22356892761,6773638.5790781425
-sluttpunkt = 87964.31359693682,6767233.745804535
-
-
-TEXTFILE = "BRDC00IGS_R_20251260000_01D_MN.rnx" #Endre denne hvis filvei endres
-DATE = "20250506"
-OBS_TIME = "033000"
+# #Lærdal
+# startpunkt = 49379.22356892761,6773638.5790781425
+# sluttpunkt = 87964.31359693682,6767233.745804535
 
 
-hey = last(startpunkt, sluttpunkt, TEXTFILE, DATE, OBS_TIME)
+# TEXTFILE = "BRDC00IGS_R_20251260000_01D_MN.rnx" #Endre denne hvis filvei endres
+# DATE = "20250506"
+# OBS_TIME = "033000"
 
-print(hey)
+
+# hey = last(startpunkt, sluttpunkt, TEXTFILE, DATE, OBS_TIME)
+
+# print(hey)
 
 
