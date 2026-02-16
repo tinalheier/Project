@@ -18,12 +18,13 @@ def hent_veglenkesekvenser_rute(startpunkt, sluttpunkt): #utm33 koord
 
     start = f"{startpunkt[0]},{startpunkt[1]}"
     slutt = f"{sluttpunkt[0]},{sluttpunkt[1]}"
+    print("start, slutt", start, slutt)
 
     params = {
      "start": start,
      "slutt": slutt,
-     "maks_avstand": 10,
-     "omkrets": 100,
+     "maks_avstand": 700,
+     "omkrets": 10000,
      "konnekteringslenker": "true"
     }
 
@@ -38,7 +39,9 @@ def hent_veglenkesekvenser_rute(startpunkt, sluttpunkt): #utm33 koord
     #Hente posisjoner til alle segmenter og gjør de til shapely LineStrings
     lines = []
 
+
     segments = data["vegnettsrutesegmenter"]
+
 
     for seg in segments: 
         wkt_line = seg["geometri"]["wkt"]
@@ -52,6 +55,7 @@ def hent_veglenkesekvenser_rute(startpunkt, sluttpunkt): #utm33 koord
 
     else:
         merged_road = lines[0]
+
 
     return merged_road
 
@@ -81,9 +85,9 @@ def dele_veilinje(startpunkt, sluttpunkt, step):
     return points
 
 
-startpunkt = 270239.58,7040945.2 #samf
-sluttpunkt = 270356.96,7039392.78
+# startpunkt = 270239.58,7040945.2 #samf
+# sluttpunkt = 270356.96,7039392.78
 
-rute = hent_veglenkesekvenser_rute(startpunkt, sluttpunkt)
+# rute = hent_veglenkesekvenser_rute(startpunkt, sluttpunkt)
 
-dele_veilinje(startpunkt, sluttpunkt, 10)
+# dele_veilinje(startpunkt, sluttpunkt, 10)
