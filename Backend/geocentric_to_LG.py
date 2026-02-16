@@ -8,9 +8,8 @@ b = 6356752.3141
 e_2nd = (a**2-b**2)/a**2
 
 
+def azimuth_and_zenith(empherids, date, observation_time, receiverCartesianPos, maskElevation):
 
-def azimuth_and_zenith(textfile, date, observation_time, receiverCartesianPos, maskElevation):
-    
     results_GPS = []
     results_Galileo = []
     results_Beidou = []
@@ -18,7 +17,6 @@ def azimuth_and_zenith(textfile, date, observation_time, receiverCartesianPos, m
     maskElevationZenith = 90 - maskElevation
 
 
-    empherids = read_rinex_file(textfile)
     empheridesfile_GPS,  empheridesfile_Galileo, empheridesfile_Beidou = empherids[0], empherids[1], empherids[2]
     
 
@@ -161,3 +159,12 @@ def zentih_angle(local_coordinates):
 
 
 
+TEXTFILE = "BRDC00IGS_R_20251260000_01D_MN.rnx" #Endre denne hvis filvei endres
+DATE = "20250506"
+OBS_TIME = "033000"
+RECEIVER_COORD = np.array([3146294.9, 595984.2, 5491077.6])
+
+MASK_ELEVATION = 45
+
+
+# print(azimuth_and_zenith(TEXTFILE, DATE, OBS_TIME, RECEIVER_COORD, MASK_ELEVATION))

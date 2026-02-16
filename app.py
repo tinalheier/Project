@@ -1,11 +1,11 @@
 from flask import Flask, render_template, jsonify
 import numpy as np
 
-from skyplot_backend import compute_skyplot_data
+from Backend.skyplot_backend import compute_skyplot_data
 
 app = Flask(__name__)
 
-TEXTFILE = "BRDC00IGS_R_20251260000_01D_MN.rnx"
+TEXTFILE = "BRDC00IGS_R_20251260000_01D_MN.rnx" #Endre denne hvis filvei endres
 DATE = "20250506"
 OBS_TIME = "033000"
 RECEIVER_COORD = np.array([3146294.9, 595984.2, 5491077.6])
