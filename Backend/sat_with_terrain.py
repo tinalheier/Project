@@ -8,6 +8,8 @@ from geocentric_to_LG import read_rinex_file
 from rasterfiles import combine_tifs
 import os
 
+from DOPcalculation import designMatrixA 
+
 # horizon_mask_360(pointA, az_step, buffer, step) #Lat og long
 # dele_veilinje(startpunkt, sluttpunkt, step): #UTM33
 
@@ -32,32 +34,33 @@ def find_available_sats(textfile, date, observation_time, maskElevation, max_ele
         
         GPS, Galileo, Beidou = azimuth_and_zenith(empherids, date, observation_time, punkt, maskElevation)
         
-        for satname, az, zen in GPS:
+        for satname, x,y,z, az, zen in GPS:
             sat_elev = 90 - zen
             nearest_az = min(horizon.keys(), key=lambda a: abs(a - az + 180) % 360 - 180)
             terrain_elev = horizon[nearest_az]
             if sat_elev > terrain_elev:
-                GPS_updated.append((satname, az, sat_elev))
+                GPS_updated.append((satname, x,y,z, az, sat_elev))
 
-        for satname, az, zen in Galileo:
+        for satname, x,y,z, az, zen in Galileo:
             sat_elev = 90 - zen
             nearest_az = min(horizon.keys(), key=lambda a: abs(a - az))
             terrain_elev = horizon[nearest_az]
             if sat_elev > terrain_elev:
-                Galileo_updated.append((satname, az, sat_elev))
+                Galileo_updated.append((satname, x,y,z, az, sat_elev))
 
-        for satname, az, zen in Beidou:
+        for satname, x,y,z, az, zen in Beidou:
             sat_elev = 90 - zen
             nearest_az = min(horizon.keys(), key=lambda a: abs(a - az))
             terrain_elev = horizon[nearest_az]
             if sat_elev > terrain_elev:
-                Beidou_updated.append((satname, az, sat_elev))
+                Beidou_updated.append((satname,x,y,z, az, sat_elev))
         
         available_sats_point[punkt] = {
         "GPS": GPS_updated,
         "Galileo": Galileo_updated,
         "Beidou": Beidou_updated
     }
+        
     return available_sats_point
 
 
@@ -101,16 +104,18 @@ def last(startpunkt, sluttpunkt, textfile, date, obs_time):
         )
         result = find_available_sats(TEXTFILE, DATE, OBS_TIME, 45, sjekk)
 
+        matrix = designMatrixA(result)
+
     finally:
         if os.path.exists(merged_tif):
             os.remove(merged_tif)
             print("Slettet midlertidig raster:", merged_tif)
 
-    return result
+    return matrix
 
 # # #TRD
-# # startpunkt = 270353.68,7040091.61 
-# # sluttpunkt = 270386.58,7039786.7
+# startpunkt = 270353.68,7040091.61 
+# sluttpunkt = 270386.58,7039786.7
 
 # #Lærdal
 # startpunkt = 49379.22356892761,6773638.5790781425

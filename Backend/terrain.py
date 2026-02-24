@@ -8,6 +8,7 @@ from rasterio.transform import rowcol
 
 
 
+#fra utm33 til ECEF
 tf = Transformer.from_crs("EPSG:25833", "EPSG:4978", always_xy=True)
 
 

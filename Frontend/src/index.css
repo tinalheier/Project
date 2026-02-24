@@ -43,12 +43,14 @@ body {
   /* background: #eee; */
   background: white;
   margin-top: 3%;
+  overflow-y:scroll;
 }
 
 .right {
   flex: 2;
-  background: #ddd;
+  background: white;
   margin-right: 2%;
+  overflow-y:scroll;
 }
 
 #headerH1{
@@ -165,7 +167,7 @@ body {
 }
 
 
-#roadbutton{
+.roadbutton{
   background-color: #DFE7CB;
   width: 160px;
   border: none;
@@ -183,14 +185,32 @@ body {
 }
 
 
-#roadbutton:hover {
+.roadbutton:hover {
   background-color: #AAB198;
   color: black;
 }
 
+.roadbutton:disabled {
+  opacity: 0.45;            
+  cursor: not-allowed;
+  box-shadow: none;
+}
+
+.roadbutton:disabled:hover {
+  background-color: #DFE7CB;
+}
+
 
 .boks{
+  margin-top: 9%;
+  height: 200px;
+  background-color: purple;
+}
+
+/* 
+map page */
+
+#resetButtonMap{
   margin-top: 15px;
-  height: 20%;
-  background-color: pink;
+  margin-bottom: 15px;
 }
