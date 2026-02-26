@@ -32,6 +32,7 @@ function Frontpage() {
     const [startText, setStartText] = useState("")
     const [endText, setEndText] = useState("")
     const [route, setRoute] = useState<[number, number][]>([])
+    const [date, setDate] = useState("")
 
     const startUtm = useMemo(() => getUTMNumbers(startText), [startText])
     const endUtm = useMemo(() => getUTMNumbers(endText), [endText])
@@ -39,13 +40,15 @@ function Frontpage() {
     const startLatLng =  useMemo(() => UTM33ToLatLng(startUtm), [startUtm])
     const endLatLng =  useMemo(() => UTM33ToLatLng(endUtm), [endUtm])
 
+   
+
     useEffect(() =>{
         if (!startUtm || !endUtm){
             setRoute([])
             return
         }
 
-        fetch(`http://127.0.0.1:5000/api/route?start_e=${startUtm.east}&start_n=${startUtm.north}&end_e=${endUtm.east}&end_n=${endUtm.north}`)
+        fetch(`http://127.0.0.1:5000/api/route?start_e=${startUtm.east}&start_n=${startUtm.north}&end_e=${endUtm.east}&end_n=${endUtm.north}&date=${date}`)
         .then(r => r.json())
         .then(geo =>{
             const coords = geo.geometry.coordinates
@@ -55,8 +58,8 @@ function Frontpage() {
         .catch(console.error)
     }, [startUtm, endUtm])
 
-    const [start, setStart] = useState<[number, number] | null>(null)
-    const [end, setEnd] = useState<[number, number] | null>(null)
+
+
 
 
     return (
@@ -80,7 +83,8 @@ function Frontpage() {
                 <p>
                     Observation time (UTC)
                 </p>
-                <input type="datetime-local" />
+                <input type="datetime-local" value = {date} 
+                onChange={(e) => setDate(e.target.value)}/>
             </div>
             <div id ="gnss-systems">
                 <h2>GNSS Systems</h2>

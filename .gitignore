@@ -1,9 +1,9 @@
 __pycache__/
 Backend/__pycache__/
 Backend/data/
+.env
 *.pyc
-
-
+cookies.txt
 
 
 
