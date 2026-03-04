@@ -33,6 +33,14 @@ function Frontpage() {
     const [endText, setEndText] = useState("")
     const [route, setRoute] = useState<[number, number][]>([])
     const [date, setDate] = useState("")
+    const [mask, setMask] = useState<number>(10)
+    const [selectedSystems, setSelectedSystems] = useState({
+        GPS: true, 
+        Galileo: true,
+        Beidou: true,
+    });
+    const [errorMessage, setErrorMessage] = useState<string | null>(null)
+    const [buttonClick, setButtonClick] = useState(false)
 
     const startUtm = useMemo(() => getUTMNumbers(startText), [startText])
     const endUtm = useMemo(() => getUTMNumbers(endText), [endText])
@@ -40,15 +48,58 @@ function Frontpage() {
     const startLatLng =  useMemo(() => UTM33ToLatLng(startUtm), [startUtm])
     const endLatLng =  useMemo(() => UTM33ToLatLng(endUtm), [endUtm])
 
-   
+    const [dopPoints, setDopPoints] = useState<any[]>([])
 
+    function roadAnalysis(){
+        setButtonClick(true)
+        if (!startUtm || !endUtm) return
+      
+        fetch(
+          `http://127.0.0.1:5000/api/dop?` +
+          `start_e=${startUtm.east}` +
+          `&start_n=${startUtm.north}` +
+          `&end_e=${endUtm.east}` +
+          `&end_n=${endUtm.north}` +
+          `&date=${date}` +
+          `&gps=${selectedSystems.GPS}` +
+          `&galileo=${selectedSystems.Galileo}` +
+          `&beidou=${selectedSystems.Beidou}` +
+          `&mask=${mask}`
+        )
+        .then(r => r.json())
+        .then(data => {
+          if (!data?.features) {
+            console.error("No features in response:", data)
+            setDopPoints([])
+            return
+          }
+          setDopPoints(data.features)
+        })
+        .catch(console.error)
+      }
+    
+           
     useEffect(() =>{
         if (!startUtm || !endUtm){
             setRoute([])
+            if (buttonClick){
+                setErrorMessage("Choose start- and endpoint.")
+            }
             return
         }
 
-        fetch(`http://127.0.0.1:5000/api/route?start_e=${startUtm.east}&start_n=${startUtm.north}&end_e=${endUtm.east}&end_n=${endUtm.north}&date=${date}`)
+        if (!date){
+            if (buttonClick){
+            setErrorMessage("Observationtime must be chosen.")
+            }
+            return
+        }
+
+  
+        setErrorMessage(null)
+
+        fetch(`http://127.0.0.1:5000/api/route?start_e=${startUtm.east}&start_n=${startUtm.north}&end_e=${endUtm.east}&end_n=${endUtm.north}`)
+        
         .then(r => r.json())
         .then(geo =>{
             const coords = geo.geometry.coordinates
@@ -56,9 +107,7 @@ function Frontpage() {
             setRoute(latlngs)
         })
         .catch(console.error)
-    }, [startUtm, endUtm])
-
-
+    }, [startUtm, endUtm, date, buttonClick])
 
 
 
@@ -91,15 +140,21 @@ function Frontpage() {
                 <div id ="checkbox-row">
                     <div className ="checkbox-id">
                         <p> GPS </p>
-                        <input type ="checkbox" id="GPS-button" className="gnss-checkbox"/>
+                        <input type ="checkbox" id="GPS-button" className="gnss-checkbox" 
+                        checked = {selectedSystems.GPS} onChange={(e) =>
+                        setSelectedSystems(prev => ({ ...prev, GPS:e.target.checked})) }/>
                     </div>
                     <div className ="checkbox-id">
                         <p> Galileo </p>
-                        <input type ="checkbox" id="Galileo-button" className="gnss-checkbox"/>
+                        <input type ="checkbox" id="Galileo-button" className="gnss-checkbox"
+                        checked = {selectedSystems.Galileo} onChange={(e) =>
+                            setSelectedSystems(prev => ({ ...prev, Galileo:e.target.checked})) }/>
                     </div>
                     <div className ="checkbox-id">
                         <p> BeiDou </p>
-                        <input type ="checkbox" id="BeiDou-button" className="gnss-checkbox"/>
+                        <input type ="checkbox" id="BeiDou-button" className="gnss-checkbox"
+                        checked = {selectedSystems.Beidou} onChange={(e) =>
+                            setSelectedSystems(prev => ({ ...prev, Beidou:e.target.checked})) }/>
                     </div>
                     <div className ="checkbox-id">
                         <p> GLONASS </p>
@@ -108,15 +163,21 @@ function Frontpage() {
                 </div>
             </div>
             <div id="maskanglebox">
-                <p> Mask angle</p>
-                <input type = "range" min="1" max ="90" className="slider" id ="mySlider"/>
+                <p> Mask angle: {mask}°</p>
+                <input type = "range" min="1" max ="90" className="slider" id ="mySlider" value = {mask} 
+                onChange={(e) => setMask(Number(e.target.value))}/>
             </div>
+            {errorMessage && (
+            <div style={{ color: "red", marginBottom: "10px" }}>
+                {errorMessage}
+            </div>
+            )}
             <div id = "findroad">
-                <button className = "roadbutton"> Find road </button>
+                <button className = "roadbutton" onClick ={roadAnalysis}> DOP analysis </button>
             </div>
         </div>
         <div className="right">
-            <MapPage start={startLatLng}  end={endLatLng} route={route} setStartUtmText={(utmText: string) => setStartText(utmText)}
+            <MapPage start={startLatLng}  end={endLatLng} route={route} dopPoints={dopPoints} setStartUtmText={(utmText: string) => setStartText(utmText)}
           setEndUtmText={(utmText: string) => setEndText(utmText)}/>
 
             <div className="boks">

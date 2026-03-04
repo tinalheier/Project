@@ -11,7 +11,7 @@ def get_ephemerides(day, year):
     GPS, Galileo, BeiDou = read_rinex_file(rinex_path)
 
     day_folder = os.path.join(df_folder, str(year), str(day).zfill(3))
-    os.makedirs(day, exist_ok=True)
+    os.makedirs(day_folder, exist_ok=True)
     
     gps_path = os.path.join(day_folder, f"GPS.pkl")
     gal_path = os.path.join(day_folder, f"Galileo.pkl")

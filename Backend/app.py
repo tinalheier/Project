@@ -3,14 +3,16 @@ from flask_cors import CORS
 import numpy as np
 from pyproj import Transformer
 from skyplot_backend import compute_skyplot_data
-from roads import hent_veglenkesekvenser_rute
+from roads import hent_veglenkesekvenser_rute, dele_veilinje
 from datetime import datetime
+from sat_with_terrain import main
 
 app = Flask(__name__)
 
 
 #fra UTM33 til Lat/lon
 tf = Transformer.from_crs("EPSG:25833", "EPSG:4326", always_xy=True)
+ecef_to_latlon = Transformer.from_crs("EPSG:4978", "EPSG:4326", always_xy=True)
 CORS(app)
 
 
@@ -20,34 +22,13 @@ CORS(app)
 # RECEIVER_COORD = np.array([3146294.9, 595984.2, 5491077.6])
 # MASK_ELEVATION = 45
 
-#Inputs for the different observation locations in Specialization thesis
-#np.array([2816111.074, 515693.221, 5680574.092]) TRD
-#np.array([3146294.9, 595984.2, 5491077.6]) Oslo
-
 @app.get("/api/route")
 def route():
-
     try:
         start_e = float(request.args["start_e"])
         start_n = float(request.args["start_n"])
         end_e = float(request.args["end_e"])
         end_n = float(request.args["end_n"])
-
-        date = request.args.get("date")
-
-        if date:
-            dt = datetime.fromisoformat(date)
-            DATE = dt.strftime("%Y%m%d")
-            OBS_TIME = dt.strftime("%H%M%S")
-
-            d = datetime.strptime(DATE, "%Y%m%d")
-            year = DATE[0:4]
-            julian = d.timetuple().tm_yday
-
-            print(year)
-            print("Julian:", julian)
-            print("OBS_TIME:", OBS_TIME)
-    
 
         merged_road = hent_veglenkesekvenser_rute(
             (start_e, start_n),
@@ -83,16 +64,87 @@ def route():
                 "coordinates": coords
             }
         })
+    
+    
 
     except Exception as e:
         print("ROUTE ERROR:", e)
         return jsonify({"error": str(e)}), 500
     
-   
+
+@app.get("/api/dop")
+def dop():
+    try:
+        start_e = float(request.args["start_e"])
+        start_n = float(request.args["start_n"])
+        end_e = float(request.args["end_e"])
+        end_n = float(request.args["end_n"])
+
+        date = request.args.get("date")
+        gps = request.args.get("gps") == "true"
+        galileo = request.args.get("galileo") == "true"
+        beidou = request.args.get("beidou") == "true"
+        mask = float(request.args.get("mask", 10))
+
+        active_GNSS = {
+            "GPS": gps,
+            "Galileo": galileo,
+            "Beidou": beidou
+        }
+
+
+        if date:
+            dt = datetime.fromisoformat(date)
+            DATE = dt.strftime("%Y%m%d")
+            OBS_TIME = dt.strftime("%H%M%S")
+
+            d = datetime.strptime(DATE, "%Y%m%d")
+            year = DATE[0:4]
+            julian = d.timetuple().tm_yday
+
+            print(year)
+            print("Julian:", julian)
+            print("OBS_TIME:", OBS_TIME)
     
-@app.route("/api/GNSS-test")
-def test():
-    return jsonify({"msg": "He hei"})
+
+    
+        dop_dict = main((start_e, start_n), (end_e, end_n), julian, year, OBS_TIME, mask, active_GNSS)
+        
+        features = []
+
+        for coord, data in dop_dict.items():
+
+            if "PDOP" not in data:
+                x, y, z = coord
+                pdop = 0
+            
+            x, y, z = coord
+            pdop = data["PDOP"]
+
+
+            lon, lat, _ = ecef_to_latlon.transform(x, y, z)
+
+            features.append({
+                "type": "Feature",
+                "geometry": {
+                    "type": "Point",
+                    "coordinates": [lon, lat]
+                },
+                "properties": {
+                    "pdop": float(pdop)
+                }
+            })
+
+        print("ferdig")
+        return jsonify({
+            "type": "FeatureCollection",
+            "features": features})
+
+            
+    except Exception as e:
+        print("DOP ERROR:", e)
+        return jsonify({"error": str(e)}), 500
+
 
 if __name__ == "__main__":
     app.run(debug=True)
