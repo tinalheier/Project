@@ -51,9 +51,21 @@ function Frontpage() {
     const [dopPoints, setDopPoints] = useState<any[]>([])
 
     function roadAnalysis(){
+
+        if (!startUtm || !endUtm){
+            setErrorMessage("Choose start and end point")
+            return
+        }
+
+        if (!date){
+            setErrorMessage("Choose obs time")
+            return
+        }
+
+        setErrorMessage(null)
+    
         setButtonClick(true)
-        if (!startUtm || !endUtm) return
-      
+     
         fetch(
           `http://127.0.0.1:5000/api/dop?` +
           `start_e=${startUtm.east}` +
@@ -77,26 +89,45 @@ function Frontpage() {
         })
         .catch(console.error)
       }
-    
+ 
            
-    useEffect(() =>{
-        if (!startUtm || !endUtm){
-            setRoute([])
-            if (buttonClick){
-                setErrorMessage("Choose start- and endpoint.")
-            }
-            return
-        }
+    // useEffect(() =>{
+    //     if (!startUtm || !endUtm){
+    //         setRoute([])
+    //         if (buttonClick){
+    //             setErrorMessage("Choose start- and endpoint.")
+    //         }
+    //         return
+    //     }
 
-        if (!date){
-            if (buttonClick){
-            setErrorMessage("Observationtime must be chosen.")
-            }
-            return
-        }
+    //     if (!date){
+    //         if (buttonClick){
+    //         setErrorMessage("Observationtime must be chosen.")
+    //         }
+    //         return
+    //     }
 
   
-        setErrorMessage(null)
+    //     setErrorMessage(null)
+
+    //     fetch(`http://127.0.0.1:5000/api/route?start_e=${startUtm.east}&start_n=${startUtm.north}&end_e=${endUtm.east}&end_n=${endUtm.north}`)
+        
+    //     .then(r => r.json())
+    //     .then(geo =>{
+    //         const coords = geo.geometry.coordinates
+    //         const latlngs = coords.map(([lon, lat]: [number, number]) => [lat,lon])
+    //         setRoute(latlngs)
+    //     })
+    //     .catch(console.error)
+    // }, [startUtm, endUtm, date, buttonClick])
+
+
+       useEffect(() =>{
+        if (!startUtm || !endUtm){
+            setRoute([])
+ 
+            return
+        }
 
         fetch(`http://127.0.0.1:5000/api/route?start_e=${startUtm.east}&start_n=${startUtm.north}&end_e=${endUtm.east}&end_n=${endUtm.north}`)
         
@@ -107,9 +138,7 @@ function Frontpage() {
             setRoute(latlngs)
         })
         .catch(console.error)
-    }, [startUtm, endUtm, date, buttonClick])
-
-
+    }, [startUtm, endUtm])
 
     return (
       <div className="frontpage">

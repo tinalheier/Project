@@ -33,7 +33,7 @@ def main(startpunkt, sluttpunkt, day, year, obs_time, maskangle, active_GNSS):
             sluttpunkt,
             50,
             10,
-            19000, #10-15k ble for kort
+            20000, #10-15k ble for kort
             10
         )
 
