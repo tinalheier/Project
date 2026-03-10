@@ -2,6 +2,7 @@ import MapPage from "./map"
 import { useEffect, useMemo, useState } from "react"
 import proj4 from "proj4"
 import Skyplot from "./skyplot"
+import LineChart from "./dopchart"
 
 
 proj4.defs("EPSG:25833", "+proj=utm +zone=33 +ellps=GRS80 +towgs84=0, 0, 0, 0, 0, 0, 0 +units=m +no_defs")
@@ -55,6 +56,8 @@ function Frontpage() {
 
     const [dopPoints, setDopPoints] = useState<any[]>([])
 
+    const [dopChartData, setDopChartData] = useState<{ distance: number; pdop: number; lat: number; lon: number}[]>([])
+
     function roadAnalysis(){
 
         if (!startUtm || !endUtm){
@@ -88,9 +91,11 @@ function Frontpage() {
           if (!data?.features) {
             console.error("No features in response:", data)
             setDopPoints([])
+            setDopChartData([])
             return
           }
           setDopPoints(data.features)
+          setDopChartData(data.chart)
         })
         .catch(console.error)
       }
@@ -200,11 +205,17 @@ function Frontpage() {
 
             <div className="boks">
                
-                {/* {skyplotData && (
+
+                {dopChartData.length > 0 && (
+                    <LineChart data = {dopChartData} handlePointClick = {handlePointClick}/>
+                )}
+
+                 {skyplotData && (
                     <Skyplot data ={skyplotData} />
-                )} */}
+                )}
 
             </div>
+           
         
         </div>
       </div>

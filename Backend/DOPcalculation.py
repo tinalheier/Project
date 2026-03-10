@@ -1,29 +1,36 @@
 
 import numpy as np
+import math
 
 def DOPChart(dictionary):
 
-    points = list(dictionary.keys())
+    points = list(dictionary.items())
 
-    distances = [0]
-    pdop_values = []
+    json = []
 
-    total_distance = 0
+    dist = 0
+    prev_point = None
 
-    for i, point in enumerate(points):
+    for point, data in points:
 
-        pdop = dictionary[point].get("PDOP", None)
-        pdop_values.append(pdop)
+        x, y, z = point
+        pdop = data["PDOP"]
 
-        if i > 0:
-            p1 = np.array(points[i-1])
-            p2 = np.array(point)
+        if prev_point is not None:
+            x0, y0, z0 = prev_point
+            dist_calc = math.sqrt((x-x0)**2 + (y-y0)**2 + (z-z0)**2)
+            dist += dist_calc
+        
+        json.append({
+            "distance": round(dist, 2),
+            "pdop": pdop
+        })
 
-            d = np.linalg.norm(p2 - p1)
-            total_distance += d
-            distances.append(total_distance)
+        prev_point = point
 
-    return distances, pdop_values
+    return json
+
+# [{'distance': 0, 'pdop': 1.2868450927455393}, {'distance': 23.466972489751402, 'pdop': 28.984801418400007}]
 
 def designMatrixA(dictionary, active_GNSS):
 
@@ -117,6 +124,23 @@ def designMatrixA(dictionary, active_GNSS):
 #             ('C01', -34378568.625905976, 24467385.91001373, -447162.66818953777, 1.8358103911159735, 19.611562190505722),
 #             ('C04', -39517425.99409891, 14663180.248367283, 1725016.4924276625, 2.09181457017702, 24.667001537287362),
 #         ]
+#     },
+#     (2814400.5000000000, 516260.3000000000, 5681215.9000000000): {
+#         "GPS": [
+#             ('G05', -12100000.12, -21300000.55, -14300000.66, 3.1, 40.2),
+#             ('G07', 15600000.45, -8900000.11, -20200000.99, 5.4, 25.7),
+#             ('G09', -21400000.76, 9100000.22, -13200000.33, 1.7, 55.4),
+#             ('G13', 4300000.66, 21400000.88, -18100000.44, 0.9, 35.0)
+#         ],
+#         "Galileo": [
+#             ('E11', 19000000.22, -16200000.11, -17300000.88, 4.2, 30.5),
+#             ('E18', -13400000.44, -24200000.77, 5100000.12, 2.6, 20.3),
+#             ('E24', 7200000.55, 19400000.99, -20100000.66, 1.1, 28.9)
+#         ],
+#         "Beidou": [
+#             ('C06', -36200000.55, 18800000.44, 2200000.77, 2.2, 18.4),
+#             ('C09', -38800000.11, 14200000.66, 3100000.55, 2.8, 23.7)
+#         ]
 #     }
 #     }
 
@@ -126,4 +150,7 @@ def designMatrixA(dictionary, active_GNSS):
 #     "Beidou": True
 # }
 
-# print(designMatrixA(data, active_GNSS))
+
+# dict = designMatrixA(data, active_GNSS)
+
+# print(DOPChart(dict))

@@ -6,6 +6,7 @@ from skyplot_backend import compute_skyplot_data
 from roads import hent_veglenkesekvenser_rute, dele_veilinje
 from datetime import datetime
 from sat_with_terrain import main
+from DOPcalculation import DOPChart
 
 app = Flask(__name__)
 
@@ -109,7 +110,7 @@ def dop():
 
     
         dop_dict = main((start_e, start_n), (end_e, end_n), julian, year, OBS_TIME, mask, active_GNSS)
-        
+        chart = DOPChart(dop_dict)
         features = []
 
         for coord, data in dop_dict.items():
@@ -137,7 +138,8 @@ def dop():
         print("ferdig")
         return jsonify({
             "type": "FeatureCollection",
-            "features": features})
+            "features": features,
+            "chart": chart})
 
             
     except Exception as e:
