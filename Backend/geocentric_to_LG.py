@@ -2,6 +2,10 @@ from position_WGS84 import find_satellites
 from emphererides_file import read_rinex_file
 from pyproj import Transformer
 import numpy as np
+import os
+import pandas as pd
+from emphererides_file import get_ephemerides, load_ephemerides
+
 
 a = 6378137 
 b = 6356752.3141
@@ -10,45 +14,44 @@ e_2nd = (a**2-b**2)/a**2
 ecef_to_llh = Transformer.from_crs("EPSG:4978", "EPSG:4326",always_xy=True)
 
 
-def azimuth_and_zenith(empherids, date, observation_time, receiverCartesianPos, maskElevation):
+def azimuth_and_zenith(day, year,  observation_time, receiverCartesianPos, maskElevation, empheridesfile_GPS, empheridesfile_Galileo,
+    empheridesfile_Beidou):
+    
     results_GPS = []
     results_Galileo = []
     results_Beidou = []
 
     maskElevationZenith = 90 - maskElevation
 
-
-    empheridesfile_GPS,  empheridesfile_Galileo, empheridesfile_Beidou = empherids[0], empherids[1], empherids[2]
-    
-
-    satellites_GPS = find_satellites(empheridesfile_GPS, date, observation_time)
-    satellites_Galileo = find_satellites(empheridesfile_Galileo, date, observation_time)
-    satellites_Beidou = find_satellites(empheridesfile_Beidou, date, observation_time)
+    satellites_GPS = find_satellites(empheridesfile_GPS, day, year, observation_time)
+    satellites_Galileo = find_satellites(empheridesfile_Galileo, day, year, observation_time)
+    satellites_Beidou = find_satellites(empheridesfile_Beidou, day, year, observation_time)
 
     lat,long,h = ecef_to_llh.transform(receiverCartesianPos[0], receiverCartesianPos[1], receiverCartesianPos[2])
     latlong_receiver = (lat,long,h)
+
     for index, row in satellites_GPS.iterrows():
 
         sat_pos = row["satellitePosition"]
         distance_sat_receiver = baseline(sat_pos, receiverCartesianPos)
         LG = local_coordinates(distance_sat_receiver, latlong_receiver)
         zenith = float(zentih_angle(LG)* 180/np.pi) #degree
+            
         
-    
         if zenith <= 90 and zenith <= maskElevationZenith:
             x,y,z  = sat_pos
             satname = row["sat"]
             bearing = float(bearing_LG(LG))
             results_GPS.append((satname, x,y,z, bearing, zenith))
 
-   
+    
     for index, row in satellites_Galileo.iterrows():
 
         sat_pos = row["satellitePosition"]
         distance_sat_receiver = baseline(sat_pos, receiverCartesianPos)
         LG = local_coordinates(distance_sat_receiver, latlong_receiver)
 
-        
+            
         zenith = float(zentih_angle(LG)* 180/np.pi)
 
         if zenith <= 90 and zenith <= maskElevationZenith:
@@ -56,7 +59,7 @@ def azimuth_and_zenith(empherids, date, observation_time, receiverCartesianPos, 
             satname = row["sat"]
             bearing = float(bearing_LG(LG))
             results_Galileo.append((satname, x,y,z, bearing, zenith))    
-    
+        
 
     for index, row in satellites_Beidou.iterrows():
 
@@ -66,7 +69,7 @@ def azimuth_and_zenith(empherids, date, observation_time, receiverCartesianPos, 
         distance_sat_receiver = baseline(sat_pos, receiverCartesianPos)
         LG = local_coordinates(distance_sat_receiver, latlong_receiver)
 
-        
+            
         zenith = float(zentih_angle(LG)* 180/np.pi)
 
         if zenith <= 90 and zenith <= maskElevationZenith:
@@ -118,15 +121,24 @@ def zentih_angle(local_coordinates):
     return np.arccos(Z/slope_distance)  #in rad
 
 
+def dataframeExists(day, year, base_path):
+
+    if not os.path.isdir(base_path):
+        return False
+    
+    files = os.listdir(base_path)
+    if len(files) == 0:
+        return False
+    
+    return True
 
 
-# TEXTFILE = "BRDC00IGS_R_20251260000_01D_MN.rnx" #Endre denne hvis filvei endres
-# DATE = "20250506"
+# DAY = 35
+# yEAR = 2025
+
 # OBS_TIME = "033000"
 # RECEIVER_COORD = np.array([3146294.9, 595984.2, 5491077.6])
 
 # MASK_ELEVATION = 45
 
-# empherids = read_rinex_file(TEXTFILE)
-
-# print(azimuth_and_zenith(empherids, DATE, OBS_TIME, RECEIVER_COORD, MASK_ELEVATION))
+# print(azimuth_and_zenith(DAY, yEAR, OBS_TIME, RECEIVER_COORD, MASK_ELEVATION))

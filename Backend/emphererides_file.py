@@ -1,12 +1,40 @@
 import numpy 
 import pandas as pd
 import os
+from broadcastDownload import download
+
+df_folder = "data/dataFrames/"
+os.makedirs(df_folder, exist_ok=True)
+
+def get_ephemerides(day, year):
+    rinex_path = download(day, year) 
+    GPS, Galileo, BeiDou = read_rinex_file(rinex_path)
+
+    day_folder = os.path.join(df_folder, str(year), str(day).zfill(3))
+    os.makedirs(day_folder, exist_ok=True)
+    
+    gps_path = os.path.join(day_folder, f"GPS.pkl")
+    gal_path = os.path.join(day_folder, f"Galileo.pkl")
+    bei_path = os.path.join(day_folder, f"BeiDou.pkl")
+    
+    GPS.to_pickle(gps_path)
+    Galileo.to_pickle(gal_path)
+    BeiDou.to_pickle(bei_path)
+
+
+def load_ephemerides(day, year, base_path):
+    GPS = pd.read_pickle(os.path.join(base_path, "GPS.pkl"))
+    Galileo = pd.read_pickle(os.path.join(base_path, "Galileo.pkl"))
+    Beidou = pd.read_pickle(os.path.join(base_path, "BeiDou.pkl"))
+
+    return GPS, Galileo, Beidou
 
 def read_rinex_file(filename):
     Galileo = []
     GPS = []
     GLONASS = []
     BeiDou = []
+
 
     with open(filename, "r") as file:
         lines = file.readlines()
@@ -29,10 +57,7 @@ def read_rinex_file(filename):
             UTC_clock = line[15:17] + line[18:20] + line[21:23]  #Klokken 23:40:29 = 234029
             yearmonthdate = year + month + date  #22.AUG 2025 = 20250822
 
-            if line.startswith("G"):
-                
-
-                
+            if line.startswith("G"): 
                 block = lines[i:i+8]
            
                 j = 0
@@ -291,6 +316,7 @@ def read_rinex_file(filename):
     GalileoDf = pd.DataFrame(Galileo)
     BeiDouDf = pd.DataFrame(BeiDou)
     GLONASSDf = pd.DataFrame(GLONASS)
+
     
     return GPSDf, GalileoDf, BeiDouDf
 
@@ -298,3 +324,4 @@ def read_rinex_file(filename):
 
 def split_rinex_line(line):
     return [line[i:i+19].strip() for i in range(4, len(line), 19) if line[i:i+19].strip()]
+

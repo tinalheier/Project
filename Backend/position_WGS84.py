@@ -8,15 +8,14 @@ GM = 3.986005 * 10**14
 omega_e = 7.2921151467 * 10**(-5)
 pi = np.pi
 
-def find_satellites(df, date, observation_time):  
+def find_satellites(df, day, year, observation_time):  
     rows =[]
     positions_list = []
 
-    t_obs = observationTime(date, observation_time)   
+    t_obs = observationTime(day, year, observation_time)   
     df_sorted = df.sort_values(['sat','toe']) 
     sats = sorted(df['sat'].unique())
     df['toe'] = pd.to_numeric(df['toe'], errors='coerce')
-
 
 
     for satname in sats:
@@ -44,7 +43,7 @@ def find_satellites(df, date, observation_time):
 
         sat, epoch = row['sat'], row['epoch']
 
-        positions = findPosition(df_with_satellites_for_time, sat, epoch, observation_time)
+        positions = findPosition(df_with_satellites_for_time, sat, day, year, observation_time)
         positions_list.append(positions)
    
     df_with_satellites_for_time['satellitePosition'] = positions_list
@@ -54,7 +53,9 @@ def find_satellites(df, date, observation_time):
 
 
 
-def findPosition(df, sat, epoch, observationtime):
+def findPosition(df, sat, day, year, obstime):
+    date = datetime.datetime(int(year), 1, 1) + datetime.timedelta(days=int(day) - 1)
+    epoch = date.strftime("%Y%m%d")
   
     row = df.loc[(df["sat"] == sat) & (df["epoch"] == epoch)]
 
@@ -77,7 +78,7 @@ def findPosition(df, sat, epoch, observationtime):
     OMEGA_dot = float(row_data["OMEGA_dot"])
     i_dot_dot = float(row_data["i_dotdot"])
 
-    obstime = observationTime(epoch, observationtime)
+    obstime = observationTime(day, year, obstime)
 
     transtime = transmissionTime(obstime)
     tk_value = tk(toe, transtime)
@@ -100,58 +101,45 @@ def findPosition(df, sat, epoch, observationtime):
     return coord
 
 
-def observationTime(epoch, obstime):
-    year = int(epoch[0:4])
-    
-    if epoch[4] == "0":
-        month = int(epoch[5])
-    else: month = int(epoch[4:6])
+def observationTime(day, year, obstime):
+    date = datetime.datetime(int(year), 1, 1) + datetime.timedelta(days=int(day) - 1)
 
-    if epoch[6] == "0":
-        date = int(epoch[7])
-    else: date = int(epoch[6:8])
-    
-    dateis = datetime.date(year, month, date)  
-    
-    dayOfWeek = dateis.strftime("%A")  
+    dayOfWeek = date.weekday()
     
     hour = int(obstime[0:2]) * 60 * 60
     minutes = int(obstime[2:4]) * 60
     seconds = int(obstime[4:6])
 
 
-    if dayOfWeek == "Monday":
+    if dayOfWeek == 0: #monday
         secs = 86400
         obstime = secs + hour + minutes + seconds
 
-    elif dayOfWeek == "Tuesday":
+    elif dayOfWeek == 1: #"Tuesday"
         secs = 172800
         obstime = secs + hour + minutes + seconds
     
-    elif dayOfWeek == "Wednesday":
+    elif dayOfWeek == 2:
         secs = 259200
         obstime = secs + hour + minutes + seconds
     
-    elif dayOfWeek == "Thursday":
+    elif dayOfWeek == 3:
         secs = 345600
         obstime = secs + hour + minutes + seconds
     
-    elif dayOfWeek == "Friday":
+    elif dayOfWeek == 4:
         secs = 432000
         obstime = secs + hour + minutes + seconds
     
-    elif dayOfWeek == "Saturday":
+    elif dayOfWeek == 5:
         secs = 518400
 
         obstime = secs + hour + minutes + seconds
 
-    elif dayOfWeek == "Sunday":
+    elif dayOfWeek == 6:
         secs = 0
         obstime = secs + hour + minutes + seconds
     
-    else: 
-        print("Day doesn't exist")
-
     return obstime
 
 def transmissionTime(observation_time):
@@ -198,7 +186,6 @@ def rotation_matrix(degree):
                      [0, 0, 1]])
  
     return rot_1, rot_2, rot_3
-
 
 
 

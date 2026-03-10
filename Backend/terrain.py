@@ -47,11 +47,13 @@ def max_azimuth(distances, data, transform, Ax, Ay, zA, azimuth):
 
     zs = data[rows, cols]
 
+
     angles = np.degrees(np.arctan2(zs - zA, distances))
 
     return np.nanmax(angles)
 
 
+# 1052.1531 118223.582
 
 def horizon_mask_360(src, pointA, az_step, buffer, step):
 
@@ -77,8 +79,8 @@ def horizon_mask_360(src, pointA, az_step, buffer, step):
         res = max_azimuth(distances, data, transform, Ax, Ay, zA, az)
         
         results[az] = res
+    # print("point  A: ", pointA, " res; ", results)
    
-
     return results 
 
 
