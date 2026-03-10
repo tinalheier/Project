@@ -63,6 +63,7 @@ function MapPage({
   dopPoints,
   setStartUtmText,
   setEndUtmText,
+  onPointClick
 
 }: {
   start: LatLng
@@ -71,6 +72,7 @@ function MapPage({
   dopPoints: any[]
   setStartUtmText?: (v: string) => void
   setEndUtmText?: (v: string) => void
+  onPointClick: (lon:number, lat:number) => void
 }) 
 
 
@@ -96,7 +98,7 @@ function MapPage({
     <div style={{ height: "75%", width: "100%" }}>
       <MapContainer center={[63.4305, 10.3951]} zoom={13} style={{ height: "100%", width: "100%" }}>
         <UpdateCenterMap center = {start} />
-        
+         preferCanvas={false}
 
         <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
 
@@ -126,30 +128,24 @@ function MapPage({
           fillColor: dopColor(pdop),
           fillOpacity: 0.9,
         }}
+        eventHandlers={{
+          click: () => onPointClick(lon,lat)
+        }}
       > 
-        <Tooltip
-          permanent
-          direction="center"
-          className="dop-label"
-        >
-          {pdop === 0 ? "X" : pdop.toFixed(1)}
-          be
-
-        </Tooltip>
-
-        <Tooltip direction="top" offset={[0, -5]} opacity={1}>
-          {pdop === 0 ? (
-        <>
-          Less than 4 available satellites. <br />
-          Position (UTM33): {latLngToUtm33Text([lat, lon])}
-        </>
-      ) : (
-        <>
-          PDOP: {pdop.toFixed(2)} <br />
-          Position (UTM33): {latLngToUtm33Text([lat, lon])}
-        </>
-      )}
-        </Tooltip>
+      <Tooltip direction="top" offset={[0, -5]}>
+        <b> PDOP: </b><b>{pdop === 0 ? "X" : pdop.toFixed(3)}</b>
+        <br />
+        {pdop === 0 ? (
+          <>
+            Less than 4 available satellites<br/>
+            UTM33: {latLngToUtm33Text([lat, lon])}
+          </>
+        ) : (
+          <>
+            UTM33: {latLngToUtm33Text([lat, lon])}
+          </>
+        )}
+      </Tooltip>
       </CircleMarker>
   )
   })}

@@ -115,13 +115,12 @@ def dop():
         for coord, data in dop_dict.items():
 
             if "PDOP" not in data:
-                x, y, z = coord
                 pdop = 0
             
+            else:
+                pdop = data["PDOP"]
+
             x, y, z = coord
-            pdop = data["PDOP"]
-
-
             lon, lat, _ = ecef_to_latlon.transform(x, y, z)
 
             features.append({
@@ -145,6 +144,33 @@ def dop():
         print("DOP ERROR:", e)
         return jsonify({"error": str(e)}), 500
 
+@app.get("/api/skyplot")
+def skyplot():
+
+    lon = float(request.args["lon"])
+    lat = float(request.args["lat"])
+    date = request.args["date"]
+    mask = float(request.args.get("mask", 10))
+
+    dt = datetime.fromisoformat(date)
+
+    DATE = dt.strftime("%Y%m%d")
+    OBS_TIME = dt.strftime("%H%M%S")
+
+    d = datetime.strptime(DATE, "%Y%m%d")
+    year = DATE[0:4]
+    julian = d.timetuple().tm_yday
+
+
+    transformer = Transformer.from_crs("EPSG:4326","EPSG:4978", always_xy=True)
+
+    x,y,z = transformer.transform(lon, lat, 0)
+
+    data = compute_skyplot_data(
+        julian, year, OBS_TIME, np.array([x,y,z]),mask
+    )
+
+    return jsonify(data)
 
 if __name__ == "__main__":
     app.run(debug=True)

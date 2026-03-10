@@ -1,6 +1,8 @@
 import MapPage from "./map"
 import { useEffect, useMemo, useState } from "react"
 import proj4 from "proj4"
+import Skyplot from "./skyplot"
+
 
 proj4.defs("EPSG:25833", "+proj=utm +zone=33 +ellps=GRS80 +towgs84=0, 0, 0, 0, 0, 0, 0 +units=m +no_defs")
 
@@ -26,6 +28,8 @@ function UTM33ToLatLng(utm: UTM): LatLng{
     const[lon, lat] = proj4("EPSG:25833", "EPSG:4326", [utm.east, utm.north]) as [number, number]
     return [lat, lon]
 }
+
+
  
 function Frontpage() {
 
@@ -41,6 +45,7 @@ function Frontpage() {
     });
     const [errorMessage, setErrorMessage] = useState<string | null>(null)
     const [buttonClick, setButtonClick] = useState(false)
+    const [skyplotData, setSkyplotData] = useState<any | null>(null)
 
     const startUtm = useMemo(() => getUTMNumbers(startText), [startText])
     const endUtm = useMemo(() => getUTMNumbers(endText), [endText])
@@ -91,36 +96,6 @@ function Frontpage() {
       }
  
            
-    // useEffect(() =>{
-    //     if (!startUtm || !endUtm){
-    //         setRoute([])
-    //         if (buttonClick){
-    //             setErrorMessage("Choose start- and endpoint.")
-    //         }
-    //         return
-    //     }
-
-    //     if (!date){
-    //         if (buttonClick){
-    //         setErrorMessage("Observationtime must be chosen.")
-    //         }
-    //         return
-    //     }
-
-  
-    //     setErrorMessage(null)
-
-    //     fetch(`http://127.0.0.1:5000/api/route?start_e=${startUtm.east}&start_n=${startUtm.north}&end_e=${endUtm.east}&end_n=${endUtm.north}`)
-        
-    //     .then(r => r.json())
-    //     .then(geo =>{
-    //         const coords = geo.geometry.coordinates
-    //         const latlngs = coords.map(([lon, lat]: [number, number]) => [lat,lon])
-    //         setRoute(latlngs)
-    //     })
-    //     .catch(console.error)
-    // }, [startUtm, endUtm, date, buttonClick])
-
 
        useEffect(() =>{
         if (!startUtm || !endUtm){
@@ -139,6 +114,20 @@ function Frontpage() {
         })
         .catch(console.error)
     }, [startUtm, endUtm])
+
+    function handlePointClick(lon:number, lat:number){
+    fetch(
+    `http://127.0.0.1:5000/api/skyplot?` +
+    `lon=${lon}` +
+    `&lat=${lat}` +
+    `&date=${date}` +
+    `&mask=${mask}`
+  )
+  .then(r => r.json())
+  .then(data => {
+    setSkyplotData(data)
+  })
+    }
 
     return (
       <div className="frontpage">
@@ -206,10 +195,14 @@ function Frontpage() {
             </div>
         </div>
         <div className="right">
-            <MapPage start={startLatLng}  end={endLatLng} route={route} dopPoints={dopPoints} setStartUtmText={(utmText: string) => setStartText(utmText)}
+            <MapPage start={startLatLng}  end={endLatLng} route={route} dopPoints={dopPoints} onPointClick={handlePointClick} setStartUtmText={(utmText: string) => setStartText(utmText)}
           setEndUtmText={(utmText: string) => setEndText(utmText)}/>
 
             <div className="boks">
+               
+                {/* {skyplotData && (
+                    <Skyplot data ={skyplotData} />
+                )} */}
 
             </div>
         

@@ -1,9 +1,32 @@
 
 import numpy as np
 
+def DOPChart(dictionary):
+
+    points = list(dictionary.keys())
+
+    distances = [0]
+    pdop_values = []
+
+    total_distance = 0
+
+    for i, point in enumerate(points):
+
+        pdop = dictionary[point].get("PDOP", None)
+        pdop_values.append(pdop)
+
+        if i > 0:
+            p1 = np.array(points[i-1])
+            p2 = np.array(point)
+
+            d = np.linalg.norm(p2 - p1)
+            total_distance += d
+            distances.append(total_distance)
+
+    return distances, pdop_values
+
 def designMatrixA(dictionary, active_GNSS):
 
-    # dict = {}
 
     for point, systems in dictionary.items():
 

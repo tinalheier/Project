@@ -32,10 +32,13 @@ def main(startpunkt, sluttpunkt, day, year, obs_time, maskangle, active_GNSS):
             startpunkt,
             sluttpunkt,
             50,
-            10,
-            20000, #10-15k ble for kort
+            2,
+            10000, #10-15k ble for kort
             10
         )
+
+
+
 
         result = find_available_sats(day, year, obs_time, maskangle, sjekk)
         dict_w_DOP = designMatrixA(result, active_GNSS)
@@ -77,6 +80,8 @@ def find_available_sats(day, year, observation_time, maskElevation, max_elev_and
             sat_elev = 90 - zen
             nearest_az = min(horizon.keys(), key=lambda a: abs((a - az + 180) % 360 - 180))
             terrain_elev = horizon[nearest_az]
+            if sat_elev < terrain_elev:
+                print("under: ", satname, sat_elev, terrain_elev)
             if sat_elev > terrain_elev:
                 GPS_updated.append((satname, x,y,z, az, sat_elev))
 
@@ -84,6 +89,8 @@ def find_available_sats(day, year, observation_time, maskElevation, max_elev_and
             sat_elev = 90 - zen
             nearest_az = min(horizon.keys(), key=lambda a: abs((a - az + 180) % 360 - 180))
             terrain_elev = horizon[nearest_az]
+            if sat_elev < terrain_elev:
+                print("under: ", satname, sat_elev, terrain_elev)
             if sat_elev > terrain_elev:
                 Galileo_updated.append((satname, x,y,z, az, sat_elev))
 
@@ -91,6 +98,8 @@ def find_available_sats(day, year, observation_time, maskElevation, max_elev_and
             sat_elev = 90 - zen
             nearest_az = min(horizon.keys(), key=lambda a: abs((a - az + 180) % 360 - 180))
             terrain_elev = horizon[nearest_az]
+            if sat_elev < terrain_elev:
+                print("under: ", satname, sat_elev, terrain_elev)
             if sat_elev > terrain_elev:
                 Beidou_updated.append((satname,x,y,z, az, sat_elev))
         
@@ -130,9 +139,6 @@ def find_max_elev_horizon_360(raster_path, startpunkt, sluttpunkt, step_vei, ste
     return elevation_along_road_360
 
     src.close()
-
-
-
 
 #Returnerer dict på formen:
 #(3093078.660852142, 365968.15045084106, 5547352.932991824): {'GPS': 
