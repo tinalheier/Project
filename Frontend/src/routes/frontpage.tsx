@@ -43,6 +43,7 @@ function Frontpage() {
         GPS: true, 
         Galileo: true,
         Beidou: true,
+        Glonass: true,
     });
     const [errorMessage, setErrorMessage] = useState<string | null>(null)
     const [buttonClick, setButtonClick] = useState(false)
@@ -84,6 +85,7 @@ function Frontpage() {
           `&gps=${selectedSystems.GPS}` +
           `&galileo=${selectedSystems.Galileo}` +
           `&beidou=${selectedSystems.Beidou}` +
+          `&glonass=${selectedSystems.Glonass}` +
           `&mask=${mask}`
         )
         .then(r => r.json())
@@ -181,7 +183,9 @@ function Frontpage() {
                     </div>
                     <div className ="checkbox-id">
                         <p> GLONASS </p>
-                        <input type ="checkbox" id="GLONASS-button" className="gnss-checkbox"/>
+                        <input type ="checkbox" id="GLONASS-button" className="gnss-checkbox"
+                        checked = {selectedSystems.Glonass} onChange={(e) =>
+                            setSelectedSystems(prev => ({ ...prev, Glonass:e.target.checked})) }/>
                     </div>
                 </div>
             </div>

@@ -1,4 +1,4 @@
-from position_WGS84 import find_satellites
+from position_WGS84 import find_satellites, find_satellites_GLONASS
 from emphererides_file import read_rinex_file
 from pyproj import Transformer
 import numpy as np
@@ -15,17 +15,20 @@ ecef_to_llh = Transformer.from_crs("EPSG:4978", "EPSG:4326",always_xy=True)
 
 
 def azimuth_and_zenith(day, year,  observation_time, receiverCartesianPos, maskElevation, empheridesfile_GPS, empheridesfile_Galileo,
-    empheridesfile_Beidou):
+    empheridesfile_Beidou, empheridesfile_Glonass):
     
     results_GPS = []
     results_Galileo = []
     results_Beidou = []
+    results_Glonass = []
 
     maskElevationZenith = 90 - maskElevation
 
     satellites_GPS = find_satellites(empheridesfile_GPS, day, year, observation_time)
     satellites_Galileo = find_satellites(empheridesfile_Galileo, day, year, observation_time)
     satellites_Beidou = find_satellites(empheridesfile_Beidou, day, year, observation_time)
+    satellites_Glonass = find_satellites_GLONASS(empheridesfile_Glonass, day, year, observation_time)
+
 
     lat,long,h = ecef_to_llh.transform(receiverCartesianPos[0], receiverCartesianPos[1], receiverCartesianPos[2])
     latlong_receiver = (lat,long,h)
@@ -41,7 +44,7 @@ def azimuth_and_zenith(day, year,  observation_time, receiverCartesianPos, maskE
         if zenith <= 90 and zenith <= maskElevationZenith:
             x,y,z  = sat_pos
             satname = row["sat"]
-            bearing = float(bearing_LG(LG))
+            bearing = float(bearing_LG(LG) * 180/np.pi)
             results_GPS.append((satname, x,y,z, bearing, zenith))
 
     
@@ -57,7 +60,7 @@ def azimuth_and_zenith(day, year,  observation_time, receiverCartesianPos, maskE
         if zenith <= 90 and zenith <= maskElevationZenith:
             x,y,z  = sat_pos
             satname = row["sat"]
-            bearing = float(bearing_LG(LG))
+            bearing = float(bearing_LG(LG)* 180/np.pi)
             results_Galileo.append((satname, x,y,z, bearing, zenith))    
         
 
@@ -75,10 +78,28 @@ def azimuth_and_zenith(day, year,  observation_time, receiverCartesianPos, maskE
         if zenith <= 90 and zenith <= maskElevationZenith:
             x,y,z  = sat_pos
             satname = row["sat"]
-            bearing = float(bearing_LG(LG)) #rad
+            bearing = float(bearing_LG(LG)* 180/np.pi) #rad
             results_Beidou.append((satname,x,y,z,  bearing, zenith))   
 
-    return results_GPS, results_Galileo, results_Beidou
+
+    for index, row in satellites_Glonass.iterrows():
+
+        sat_pos = row["satellitePosition"]
+
+
+        distance_sat_receiver = baseline(sat_pos, receiverCartesianPos)
+        LG = local_coordinates(distance_sat_receiver, latlong_receiver)
+
+            
+        zenith = float(zentih_angle(LG)* 180/np.pi)
+
+        if zenith <= 90 and zenith <= maskElevationZenith:
+            x,y,z  = sat_pos
+            satname = row["sat"]
+            bearing = float(bearing_LG(LG)* 180/np.pi) #rad
+            results_Glonass.append((satname,x,y,z,  bearing, zenith))   
+            
+    return results_GPS, results_Galileo, results_Beidou, results_Glonass
 
 
 

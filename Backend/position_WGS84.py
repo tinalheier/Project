@@ -22,7 +22,6 @@ def find_satellites(df, day, year, observation_time):
         
         onlySpesificSatRows = df[df['sat'] == satname]
 
-    
         underOrEqual  = onlySpesificSatRows[onlySpesificSatRows['toe'] <= t_obs]
        
 
@@ -49,6 +48,50 @@ def find_satellites(df, day, year, observation_time):
     df_with_satellites_for_time['satellitePosition'] = positions_list
 
  
+    return df_with_satellites_for_time
+
+
+def find_satellites_GLONASS(df, day, year, observation_time):
+    rows =[]
+    positions_list = []
+
+    t_obs = observationTime(day, year, observation_time)
+
+    df['time_ref'] = pd.to_numeric(df['time_ref'], errors='coerce')
+    df_sorted = df.sort_values(['sat','time_ref']) 
+
+    sats = sorted(df['sat'].unique())
+
+    for satname in sats: 
+
+        onlySpesificSatRows = df[df['sat'] == satname]
+        underOrEqual  = onlySpesificSatRows[onlySpesificSatRows['time_ref'] <= t_obs]
+       
+
+        if not underOrEqual.empty:
+            row = (t_obs - underOrEqual['time_ref']).abs().idxmin()
+            
+        
+        else: 
+            row = (onlySpesificSatRows['time_frame'] - t_obs).abs().idxmin()
+        
+
+        closest_row = df.loc[row]
+        rows.append(closest_row)
+    
+    df_with_satellites_for_time = pd.DataFrame(rows)
+
+    for index, row in df_with_satellites_for_time.iterrows():
+        positions = np.array([
+            float(row["X"]),
+            float(row["Y"]),
+            float(row["Z"])
+        ])
+
+        positions_list.append(positions)
+
+    df_with_satellites_for_time["satellitePosition"] = positions_list
+
     return df_with_satellites_for_time
 
 

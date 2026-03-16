@@ -60,16 +60,17 @@ def find_available_sats(day, year, observation_time, maskElevation, max_elev_and
     if not dataframeExists(day, year, base_path):
         get_ephemerides(day, year)
     
-    GPS, Galileo, Beidou = load_ephemerides(day, year, base_path) 
+    GPS, Galileo, Beidou, Glonass = load_ephemerides(day, year, base_path) 
 
     available_sats_point = {}
 
     for punkt, horizon in max_elev_and_coord.items():
-        GPS_sats, Galileo_sats, Beidou_sats = azimuth_and_zenith(day, year, observation_time, punkt, maskElevation, GPS, Galileo, Beidou)
+        GPS_sats, Galileo_sats, Beidou_sats, Glonass_sats = azimuth_and_zenith(day, year, observation_time, punkt, maskElevation, GPS, Galileo, Beidou, Glonass)
         
         GPS_updated = []
         Galileo_updated = []
         Beidou_updated= []
+        Glonass_updated= []
 
 #print(punkt) (2815050.0861411192, 516548.4438278879, 5680854.373259013)   print(punkt[0])) 2815050.0861411192  print(punkt[1])) 516548.4438278879      print(punkt[2])) 5680854.373259013
 #dette er horszon {0: -0.038151461429198966, 40: 4.011171678047463      print(horizon[40]) =  4.011171678047463), hente ut på nøkkel 40 grader
@@ -103,10 +104,20 @@ def find_available_sats(day, year, observation_time, maskElevation, max_elev_and
             if sat_elev > terrain_elev:
                 Beidou_updated.append((satname,x,y,z, az, sat_elev))
         
+        for satname, x,y,z, az, zen in Glonass_sats:
+            sat_elev = 90 - zen
+            nearest_az = min(horizon.keys(), key=lambda a: abs((a - az + 180) % 360 - 180))
+            terrain_elev = horizon[nearest_az]
+            if sat_elev < terrain_elev:
+                print("under: ", satname, sat_elev, terrain_elev)
+            if sat_elev > terrain_elev:
+                Glonass_updated.append((satname,x,y,z, az, sat_elev))
+        
         available_sats_point[punkt] = {
         "GPS": GPS_updated,
         "Galileo": Galileo_updated,
-        "Beidou": Beidou_updated
+        "Beidou": Beidou_updated,
+        "Glonass": Glonass_updated
     }
         
     return available_sats_point

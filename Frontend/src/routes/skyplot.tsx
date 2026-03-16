@@ -18,6 +18,9 @@ function Skyplot({ data }: SkyplotProps) {
 
       <h4>Beidou satellites</h4>
       <pre>{JSON.stringify(data.Beidou, null, 2)}</pre>
+
+      <h4>Glonass satellites</h4>
+      <pre>{JSON.stringify(data.Glonass, null, 2)}</pre>
     </div>
   )
 }

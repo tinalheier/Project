@@ -85,12 +85,14 @@ def dop():
         gps = request.args.get("gps") == "true"
         galileo = request.args.get("galileo") == "true"
         beidou = request.args.get("beidou") == "true"
+        glonass = request.args.get("glonass") == "true"
         mask = float(request.args.get("mask", 10))
 
         active_GNSS = {
             "GPS": gps,
             "Galileo": galileo,
-            "Beidou": beidou
+            "Beidou": beidou,
+            "Glonass": glonass
         }
 
 

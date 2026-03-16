@@ -19,21 +19,23 @@ def compute_skyplot_data(day, year, observation_time, receiverCartesianPos,maskE
         get_ephemerides(day, year)
     
 
-    GPS, Galileo, Beidou = load_ephemerides(day, year, base_path) 
+    GPS, Galileo, Beidou, Glonass = load_ephemerides(day, year, base_path) 
 
-    results_GPS, results_Galileo, results_Beidou = azimuth_and_zenith(day, year,  observation_time, receiverCartesianPos, maskElevation, GPS, Galileo,
-    Beidou
+    results_GPS, results_Galileo, results_Beidou, results_Glonass = azimuth_and_zenith(day, year,  observation_time, receiverCartesianPos, maskElevation, GPS, Galileo,
+    Beidou, Glonass
     )
 
 
     sat_GPS, az_GPS_deg, zenith_GPS = unpack_results(results_GPS)
     sat_Galileo, az_Galileo_deg, zenith_Galileo = unpack_results(results_Galileo)
     sat_Beidou, az_Beidou_deg, zenith_Beidou = unpack_results(results_Beidou)
+    sat_Glonass, az_Glonass_deg, zenith_Glonass = unpack_results(results_Glonass)
+
 
     zen_GPS = zenith_GPS
-    print(zen_GPS)
     zen_Galileo = zenith_Galileo
     zen_Beidou = zenith_Beidou
+    zen_Glonass = zenith_Glonass
 
     dateString = day + year
     clockString = observation_time[0:2] + ":" + observation_time[2:4] + ":" + observation_time[4:6]
@@ -56,6 +58,11 @@ def compute_skyplot_data(day, year, observation_time, receiverCartesianPos,maskE
             "sat": sat_Beidou,
             "az_deg": az_Beidou_deg,
             "elev": zen_Beidou,
+        },
+         "Glonass": {
+            "sat": sat_Glonass,
+            "az_deg": az_Glonass_deg,
+            "elev": zen_Glonass,
         },
     }
 
