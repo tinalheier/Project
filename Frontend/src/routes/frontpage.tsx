@@ -122,19 +122,19 @@ function Frontpage() {
         .catch(console.error)
     }, [startUtm, endUtm])
 
-    function handlePointClick(lon:number, lat:number){
+    function handlePointClick(index:number){{
     fetch(
-    `http://127.0.0.1:5000/api/skyplot?` +
-    `lon=${lon}` +
-    `&lat=${lat}` +
+    `http://127.0.0.1:5000/api/skyplot_terrain?` +
+    `index=${index}` +
     `&date=${date}` +
     `&mask=${mask}`
-  )
+)
+
   .then(r => r.json())
   .then(data => {
     setSkyplotData(data)
   })
-    }
+    }}
 
     return (
       <div className="frontpage">

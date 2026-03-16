@@ -98,7 +98,9 @@ def azimuth_and_zenith(day, year,  observation_time, receiverCartesianPos, maskE
             satname = row["sat"]
             bearing = float(bearing_LG(LG)* 180/np.pi) #rad
             results_Glonass.append((satname,x,y,z,  bearing, zenith))   
-            
+    
+
+
     return results_GPS, results_Galileo, results_Beidou, results_Glonass
 
 

@@ -72,7 +72,7 @@ function MapPage({
   dopPoints: any[]
   setStartUtmText?: (v: string) => void
   setEndUtmText?: (v: string) => void
-  onPointClick: (lon:number, lat:number) => void
+  onPointClick: (index: number) => void
 }) 
 
 
@@ -129,7 +129,7 @@ function MapPage({
           fillOpacity: 0.9,
         }}
         eventHandlers={{
-          click: () => onPointClick(lon,lat)
+          click: () => onPointClick(idx)
         }}
       > 
       <Tooltip direction="top" offset={[0, -5]}>

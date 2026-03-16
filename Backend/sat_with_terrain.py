@@ -48,8 +48,8 @@ def main(startpunkt, sluttpunkt, day, year, obs_time, maskangle, active_GNSS):
             os.remove(merged_tif)
             print("Slettet midlertidig raster:", merged_tif)
 
+    print(dict_w_DOP)
     return dict_w_DOP
-
 
 
 def find_available_sats(day, year, observation_time, maskElevation, max_elev_and_coord):
@@ -72,10 +72,6 @@ def find_available_sats(day, year, observation_time, maskElevation, max_elev_and
         Beidou_updated= []
         Glonass_updated= []
 
-#print(punkt) (2815050.0861411192, 516548.4438278879, 5680854.373259013)   print(punkt[0])) 2815050.0861411192  print(punkt[1])) 516548.4438278879      print(punkt[2])) 5680854.373259013
-#dette er horszon {0: -0.038151461429198966, 40: 4.011171678047463      print(horizon[40]) =  4.011171678047463), hente ut på nøkkel 40 grader
-        
-    
         for satname, x,y,z, az, zen in GPS_sats:
 
             sat_elev = 90 - zen
@@ -119,7 +115,7 @@ def find_available_sats(day, year, observation_time, maskElevation, max_elev_and
         "Beidou": Beidou_updated,
         "Glonass": Glonass_updated
     }
-        
+
     return available_sats_point
 
 def dataframeExists(day, year, base_path):
