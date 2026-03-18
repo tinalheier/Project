@@ -180,10 +180,20 @@ def skyplot():
 @app.get("/api/skyplot_terrain")
 def skyplot_terrain():
 
-
     index = int(request.args["index"])
     date = request.args["date"]
     mask = float(request.args.get("mask",10))
+    gps = request.args.get("gps") == "true"
+    galileo = request.args.get("galileo") == "true"
+    beidou = request.args.get("beidou") == "true"
+    glonass = request.args.get("glonass") == "true"
+
+    active_GNSS = {
+            "GPS": gps,
+            "Galileo": galileo,
+            "Beidou": beidou,
+            "Glonass": glonass
+        }
 
     dt = datetime.fromisoformat(date)
 
@@ -207,8 +217,8 @@ def skyplot_terrain():
         OBS_TIME,
         julian,
         year,
-        mask
-
+        mask,
+        active_GNSS
     )
 
     return jsonify(data)

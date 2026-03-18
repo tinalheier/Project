@@ -127,7 +127,11 @@ function Frontpage() {
     `http://127.0.0.1:5000/api/skyplot_terrain?` +
     `index=${index}` +
     `&date=${date}` +
-    `&mask=${mask}`
+    `&mask=${mask}` +
+     `&gps=${selectedSystems.GPS}` +
+    `&galileo=${selectedSystems.Galileo}` +
+    `&beidou=${selectedSystems.Beidou}` +
+    `&glonass=${selectedSystems.Glonass}`
 )
 
   .then(r => r.json())
@@ -208,8 +212,6 @@ function Frontpage() {
           setEndUtmText={(utmText: string) => setEndText(utmText)}/>
 
             <div className="boks">
-               
-
                 {dopChartData.length > 0 && (
                     <LineChart data = {dopChartData} handlePointClick = {handlePointClick}/>
                 )}

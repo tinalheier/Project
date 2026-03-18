@@ -77,8 +77,6 @@ def find_available_sats(day, year, observation_time, maskElevation, max_elev_and
             sat_elev = 90 - zen
             nearest_az = min(horizon.keys(), key=lambda a: abs((a - az + 180) % 360 - 180))
             terrain_elev = horizon[nearest_az]
-            if sat_elev < terrain_elev:
-                print("under: ", satname, sat_elev, terrain_elev)
             if sat_elev > terrain_elev:
                 GPS_updated.append((satname, x,y,z, az, sat_elev))
 
@@ -86,8 +84,6 @@ def find_available_sats(day, year, observation_time, maskElevation, max_elev_and
             sat_elev = 90 - zen
             nearest_az = min(horizon.keys(), key=lambda a: abs((a - az + 180) % 360 - 180))
             terrain_elev = horizon[nearest_az]
-            if sat_elev < terrain_elev:
-                print("under: ", satname, sat_elev, terrain_elev)
             if sat_elev > terrain_elev:
                 Galileo_updated.append((satname, x,y,z, az, sat_elev))
 
@@ -95,8 +91,6 @@ def find_available_sats(day, year, observation_time, maskElevation, max_elev_and
             sat_elev = 90 - zen
             nearest_az = min(horizon.keys(), key=lambda a: abs((a - az + 180) % 360 - 180))
             terrain_elev = horizon[nearest_az]
-            if sat_elev < terrain_elev:
-                print("under: ", satname, sat_elev, terrain_elev)
             if sat_elev > terrain_elev:
                 Beidou_updated.append((satname,x,y,z, az, sat_elev))
         
@@ -104,8 +98,6 @@ def find_available_sats(day, year, observation_time, maskElevation, max_elev_and
             sat_elev = 90 - zen
             nearest_az = min(horizon.keys(), key=lambda a: abs((a - az + 180) % 360 - 180))
             terrain_elev = horizon[nearest_az]
-            if sat_elev < terrain_elev:
-                print("under: ", satname, sat_elev, terrain_elev)
             if sat_elev > terrain_elev:
                 Glonass_updated.append((satname,x,y,z, az, sat_elev))
         

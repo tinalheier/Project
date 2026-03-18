@@ -22,7 +22,7 @@ type ChartPoint = {
 
 type Props = {
   data: ChartPoint[]
-  handlePointClick: (lon:number, lat:number) => void
+  handlePointClick: (index: number) => void
 }
 
 function pdopColor(pdop:number){
@@ -55,9 +55,8 @@ export default function LineChart({ data, handlePointClick }: Props){
       if (!elements.length) return
 
       const index = elements[0].index
-      const point = data[index]
       
-      handlePointClick(point.lon, point.lat)
+      handlePointClick(index)
 
     },
 
@@ -81,6 +80,7 @@ export default function LineChart({ data, handlePointClick }: Props){
 
   return (
     <div style={{height: "300px"}}>
+      <p>Click on a point in the map or in the DOP chart to display Skyplot (Scroll down)</p>
       <Line data={chartData} options={options} />
     </div>
   )

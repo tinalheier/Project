@@ -11,7 +11,7 @@ def unpack_results(results):
     return satellites, azimuth, zenith
 
 
-def compute_skyplot_terrain(data_dict, observation_time, day, year, maskElevation):
+def compute_skyplot_terrain(data_dict, observation_time, day, year, maskElevation, active_GNSS):
     day = str(day).zfill(3)
 
     def unpack(system_list):
@@ -27,11 +27,20 @@ def compute_skyplot_terrain(data_dict, observation_time, day, year, maskElevatio
 
         return sat, az, elev
 
+    filtered_systems = {}
 
-    GPS = data_dict.get("GPS", [])
-    Galileo = data_dict.get("Galileo", [])
-    Beidou = data_dict.get("Beidou", [])
-    Glonass = data_dict.get("Glonass", [])
+    for key, value in data_dict.items():
+
+        if active_GNSS:
+            if not active_GNSS.get(key, False):
+                continue
+
+        filtered_systems[key] = value
+
+    GPS = filtered_systems.get("GPS", [])
+    Galileo = filtered_systems.get("Galileo", [])
+    Beidou = filtered_systems.get("Beidou", [])
+    Glonass = filtered_systems.get("Glonass", [])
 
     sat_GPS, az_GPS, elev_GPS = unpack(GPS)
     sat_Gal, az_Gal, elev_Gal = unpack(Galileo)
