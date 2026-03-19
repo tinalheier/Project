@@ -35,8 +35,6 @@ def DOPChart(dictionary):
 # [{'distance': 0, 'pdop': 1.2868450927455393}, {'distance': 23.466972489751402, 'pdop': 28.984801418400007}]
 
 def designMatrixA(dictionary, active_GNSS):
-
-
     for point, systems in dictionary.items():
 
         x_r, y_r, z_r = point

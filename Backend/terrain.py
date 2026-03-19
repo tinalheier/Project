@@ -87,7 +87,6 @@ def horizon_mask_360(src, pointA, az_step, buffer, step):
 
 
 
-
 # # testing
 
 # src = rasterio.open('Backend/data/DTM_trd.tif')       

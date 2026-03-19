@@ -31,10 +31,10 @@ def main(startpunkt, sluttpunkt, day, year, obs_time, maskangle, active_GNSS):
             merged_tif,
             startpunkt,
             sluttpunkt,
-            50,
-            2,
-            10000, #10-15k ble for kort
-            10
+            50, #Sampler hver 50m langs veistrekningen
+            2, #0-360, søker med 2 grader mellom
+            10000, #Buffer utover
+            10 #Hver 10m utover, altså hvert "kvadrat" i rasterfilen
         )
 
 
@@ -47,6 +47,7 @@ def main(startpunkt, sluttpunkt, day, year, obs_time, maskangle, active_GNSS):
         if os.path.exists(merged_tif):
             os.remove(merged_tif)
             print("Slettet midlertidig raster:", merged_tif)
+
 
     print(dict_w_DOP)
     return dict_w_DOP
@@ -105,7 +106,8 @@ def find_available_sats(day, year, observation_time, maskElevation, max_elev_and
         "GPS": GPS_updated,
         "Galileo": Galileo_updated,
         "Beidou": Beidou_updated,
-        "Glonass": Glonass_updated
+        "Glonass": Glonass_updated,
+        "max_elevation": horizon
     }
 
     return available_sats_point

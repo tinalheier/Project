@@ -43,8 +43,30 @@ function Skyplot({ data }: SkyplotProps) {
   createTrace(data.Beidou, "BeiDou", "#d62728"),
   createTrace(data.Glonass, "GLONASS", "#b2b722"),
 ].filter((t): t is any => t !== null);
+  
 
+const createTraceElevation = (maxelev: any) =>{
+  const az = Object.keys(maxelev).map(Number);
+  const elev =  Object.values(maxelev).map(Number);
+   
+  // lukke polygonet
+  const azClosed = [...az, az[0]];
+  const elevClosed = [...elev.map((e:number) => 90-e), 90-elev[0]]
+  return{
+    type: "scatterpolar", 
+    mode: "lines",
+    theta: azClosed,
+    r: elevClosed,
 
+    line: {
+      color:"red",
+      width: 2,
+    },
+
+  };
+};
+  const maxElevTrace = createTraceElevation(data.maxElevation);
+  
   const dateSkyplot = julianToDate(data.date.slice(3,8), data.date.slice(0,3));
   
   const allSatellites = [
@@ -56,29 +78,29 @@ function Skyplot({ data }: SkyplotProps) {
   return (
     <div style={{ padding: "5px", background: "white" }}>
       <h3>Skyplot</h3>
+        <div style={{background: "pink"}}>
+          <p>Date: {dateSkyplot.toLocaleDateString("no-NO")}  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Observation Time: {data.time}</p>
+          <p>Available satellites: 
+          </p>
+          <p>
+            GPS: {data.GPS?.sat?.join(", ") || "-"}
+          </p>
 
-      <p>Date: {dateSkyplot.toLocaleDateString("no-NO")}  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Observation Time: {data.time}</p>
-      <p>Available satellites: 
-      </p>
-      <p>
-        GPS: {data.GPS?.sat?.join(", ") || "-"}
-      </p>
+          <p>
+            Galileo: {data.Galileo?.sat?.join(", ") || "-"}
+          </p>
 
-      <p>
-        Galileo: {data.Galileo?.sat?.join(", ") || "-"}
-      </p>
+          <p>
+            BeiDou: {data.Beidou?.sat?.join(", ") || "-"}
+          </p>
 
-      <p>
-        BeiDou: {data.Beidou?.sat?.join(", ") || "-"}
-      </p>
-
-      <p>
-        GLONASS: {data.Glonass?.sat?.join(", ") || "-"}
-      </p>
- 
+          <p>
+            GLONASS: {data.Glonass?.sat?.join(", ") || "-"}
+          </p>
+      </div>
       <div style={{ width: "100%", height: "600px" }}>
         <Plot
-          data={traces}
+          data={[...traces, maxElevTrace]}
           layout={{
             polar: {
               radialaxis: {

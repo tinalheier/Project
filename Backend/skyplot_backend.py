@@ -51,11 +51,15 @@ def compute_skyplot_terrain(data_dict, observation_time, day, year, maskElevatio
     dateString = day + str(year)
     clockString = observation_time[0:2] + ":" + observation_time[2:4] + ":" + observation_time[4:6]
 
-
+    clean_horizon = {
+        int(k): float(v)
+        for k, v in data_dict.get("max_elevation", {}).items()
+}
     skyplot_data = {
         "date": dateString,
         "time": clockString,
         "maskElevation": maskElevation,
+        "maxElevation":clean_horizon,
     
 
         "GPS": {

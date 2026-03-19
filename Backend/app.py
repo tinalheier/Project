@@ -132,10 +132,6 @@ def dop():
             else:
                 gdop = data["GDOP"]
 
-         
-
-            
-
             x, y, z = coord
             lon, lat, _ = ecef_to_latlon.transform(x, y, z)
 
@@ -205,7 +201,7 @@ def skyplot_terrain():
         julian,
         year,
         mask,
-        active_GNSS
+        active_GNSS,
     )
 
     return jsonify(data)
