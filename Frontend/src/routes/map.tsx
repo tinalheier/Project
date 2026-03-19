@@ -50,9 +50,11 @@ function ClickHandler({
 }
 function dopColor(pdop: number) {
   if (pdop == 0) return "black"
-  if (pdop < 2) return "green"
-  if (pdop < 4) return "yellow"
-  if (pdop < 6) return "orange"
+  if (pdop < 1) return "green"
+  if (pdop < 2) return "#43c150"
+  if (pdop < 5) return "yellow" 
+  if (pdop < 10) return  "#fbbf24"
+  if (pdop < 20) return  "#fb8824"
   return "red"
 }
 
@@ -63,7 +65,8 @@ function MapPage({
   dopPoints,
   setStartUtmText,
   setEndUtmText,
-  onPointClick
+  onPointClick,
+  onResetClick
 
 }: {
   start: LatLng
@@ -73,6 +76,7 @@ function MapPage({
   setStartUtmText?: (v: string) => void
   setEndUtmText?: (v: string) => void
   onPointClick: (index: number) => void
+  onResetClick: ()=> void 
 }) 
 
 
@@ -80,6 +84,7 @@ function MapPage({
   function resetButton() {
     setStartUtmText?.("")
     setEndUtmText?.("")
+    onResetClick
   }
 
   function UpdateCenterMap({center}: {center:[number, number] | null}) {
@@ -97,6 +102,16 @@ function MapPage({
   return (
     <div style={{ height: "75%", width: "100%" }}>
       <MapContainer center={[63.4305, 10.3951]} zoom={13} style={{ height: "100%", width: "100%" }}>
+        <div className="PDOP-colorchart">
+          <h4>PDOP</h4>
+          <div><span style={{ background: "green" }}></span> &lt; 1</div>
+          <div><span style={{ background: "#43c150" }}></span> 1 - 2</div>
+          <div><span style={{ background: "yellow" }}></span> 2 - 5</div>
+           <div><span style={{ background: "#fbbf24" }}></span> 5-10</div>
+          <div><span style={{ background:"#fb8824" }}></span> 10-20</div>
+          <div><span style={{ background: "red" }}></span> &gt; 20</div>
+          <div><span style={{ background: "black" }}></span> No DOP, &lt; 4 satellites</div>
+        </div>
         <UpdateCenterMap center = {start} />
          preferCanvas={false}
 
@@ -116,6 +131,7 @@ function MapPage({
           dopPoints.map((f: any, idx: number) => {
             const [lon, lat] = f.geometry.coordinates
             const pdop = Number(f.properties?.pdop)
+            const gdop = Number(f.properties?.gdop)
             
 
     return (
@@ -142,8 +158,10 @@ function MapPage({
           </>
         ) : (
           <>
-            UTM33: {latLngToUtm33Text([lat, lon])}
-          </>
+        <b>GDOP: {gdop === 0 ? "X" : gdop.toFixed(3)}</b>
+        <br />
+        UTM33: {latLngToUtm33Text([lat, lon])}
+</>
         )}
       </Tooltip>
       </CircleMarker>

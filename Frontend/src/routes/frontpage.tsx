@@ -57,7 +57,8 @@ function Frontpage() {
 
     const [dopPoints, setDopPoints] = useState<any[]>([])
 
-    const [dopChartData, setDopChartData] = useState<{ distance: number; pdop: number; lat: number; lon: number}[]>([])
+
+    const [dopChartData, setDopChartData] = useState<{ distance: number; pdop: number; gdop: number; lat: number; lon: number}[]>([])
 
     function roadAnalysis(){
 
@@ -122,7 +123,7 @@ function Frontpage() {
         .catch(console.error)
     }, [startUtm, endUtm])
 
-    function handlePointClick(index:number){{
+    function handlePointClick(index:number){
     fetch(
     `http://127.0.0.1:5000/api/skyplot_terrain?` +
     `index=${index}` +
@@ -138,7 +139,15 @@ function Frontpage() {
   .then(data => {
     setSkyplotData(data)
   })
-    }}
+    }
+
+
+    function handleResetClick(){
+        setSkyplotData(null)
+   
+    
+        setDopChartData([])
+    }
 
     return (
       <div className="frontpage">
@@ -208,7 +217,7 @@ function Frontpage() {
             </div>
         </div>
         <div className="right">
-            <MapPage start={startLatLng}  end={endLatLng} route={route} dopPoints={dopPoints} onPointClick={handlePointClick} setStartUtmText={(utmText: string) => setStartText(utmText)}
+            <MapPage start={startLatLng}  end={endLatLng} route={route} dopPoints={dopPoints} onPointClick={handlePointClick} onResetClick={handleResetClick} setStartUtmText={(utmText: string) => setStartText(utmText)}
           setEndUtmText={(utmText: string) => setEndText(utmText)}/>
 
             <div className="boks">

@@ -214,3 +214,35 @@ map page */
   margin-top: 15px;
   margin-bottom: 15px;
 }
+
+
+.PDOP-colorchart {
+  position: absolute;
+  top: 20px;
+  right: 20px;
+  background: white;
+  padding: 10px 12px;
+  border-radius: 8px;
+  font-size: 13px;
+  box-shadow: 0 0 10px rgba(0,0,0,0.2);
+  z-index: 1000;
+}
+
+.PDOP-colorchart h4 {
+  margin: 0 0 5px 0;
+  font-size: 14px;
+}
+
+.PDOP-colorchart div {
+  display: flex;
+  align-items: center;
+  margin-bottom: 4px;
+}
+
+.PDOP-colorchart span {
+  display: inline-block;
+  width: 14px;
+  height: 14px;
+  margin-right: 6px;
+  border-radius: 3px;
+}

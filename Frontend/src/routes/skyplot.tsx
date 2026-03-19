@@ -4,7 +4,7 @@ type SkyplotProps = {
   data: any;
 };
 
-function julianToDate(year, julianDay){
+function julianToDate(year: number, julianDay: number){
   const date = new Date(year, 0)
   date.setDate(julianDay)
   return date;
@@ -43,6 +43,7 @@ function Skyplot({ data }: SkyplotProps) {
   createTrace(data.Beidou, "BeiDou", "#d62728"),
   createTrace(data.Glonass, "GLONASS", "#b2b722"),
 ].filter((t): t is any => t !== null);
+
 
   const dateSkyplot = julianToDate(data.date.slice(3,8), data.date.slice(0,3));
   

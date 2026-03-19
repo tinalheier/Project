@@ -111,6 +111,7 @@ def dop():
     
         dop_dict = main((start_e, start_n), (end_e, end_n), julian, year, OBS_TIME, mask, active_GNSS)
         global dictionary_dop_terrain
+
         dictionary_dop_terrain = dop_dict
         chart = DOPChart(dop_dict)
         features = []
@@ -119,9 +120,21 @@ def dop():
 
             if "PDOP" not in data:
                 pdop = 0
+
             
             else:
                 pdop = data["PDOP"]
+
+            
+            if "GDOP" not in data:
+                gdop = 0
+            
+            else:
+                gdop = data["GDOP"]
+
+         
+
+            
 
             x, y, z = coord
             lon, lat, _ = ecef_to_latlon.transform(x, y, z)
@@ -134,6 +147,7 @@ def dop():
                 },
                 "properties": {
                     "pdop": float(pdop),
+                    "gdop": float(gdop),
                     "index": i
                 }
             })
@@ -149,33 +163,6 @@ def dop():
         print("DOP ERROR:", e)
         return jsonify({"error": str(e)}), 500
 
-@app.get("/api/skyplot")
-def skyplot():
-
-    lon = float(request.args["lon"])
-    lat = float(request.args["lat"])
-    date = request.args["date"]
-    mask = float(request.args.get("mask", 10))
-
-    dt = datetime.fromisoformat(date)
-
-    DATE = dt.strftime("%Y%m%d")
-    OBS_TIME = dt.strftime("%H%M%S")
-
-    d = datetime.strptime(DATE, "%Y%m%d")
-    year = DATE[0:4]
-    julian = d.timetuple().tm_yday
-
-
-    transformer = Transformer.from_crs("EPSG:4326","EPSG:4978", always_xy=True)
-
-    x,y,z = transformer.transform(lon, lat, 0)
-
-    data = compute_skyplot_data(
-        julian, year, OBS_TIME, np.array([x,y,z]),mask
-    )
-
-    return jsonify(data)
 
 @app.get("/api/skyplot_terrain")
 def skyplot_terrain():

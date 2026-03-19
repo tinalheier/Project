@@ -16,6 +16,7 @@ ChartJS.register(
 type ChartPoint = {
   distance: number
   pdop: number
+  gdop: number
   lat: number
   lon: number
 }
@@ -25,12 +26,13 @@ type Props = {
   handlePointClick: (index: number) => void
 }
 
-function pdopColor(pdop:number){
-  if (pdop == 0) return "black"
-  if (pdop < 1) return "green"
-  if (pdop < 2) return "yellow"
-  if (pdop < 5) return "orange"
-
+function dopColor(dop: number){
+  if (dop == 0) return "black"
+  if (dop < 1) return "green"
+  if (dop < 2) return "#43c150"
+  if (dop < 5) return "yellow" 
+  if (dop < 10) return  "#fbbf24"
+  if (dop < 20) return  "#fb8824"
   return "red"
 }
 
@@ -43,12 +45,27 @@ export default function LineChart({ data, handlePointClick }: Props){
         label: "PDOP",
         data: data.map(p => p.pdop),
         borderColor: "pink",
-        backgroundColor: data.map(p => pdopColor(p.pdop)), 
+        backgroundColor:"pink",
+
+        pointBackgroundColor: data.map(p => dopColor(p.pdop)), 
+        pointBorderColor: "pink",
         tension: 0.2, 
-        pointRadius: 3
+        pointRadius: 5
+      },
+       {
+        label: "GDOP",
+        data: data.map(p => p.gdop),
+        borderColor: "green",
+        backgroundColor:"green",
+
+        pointBackgroundColor: data.map(p => dopColor(p.pdop)), 
+        pointBorderColor: "green",
+        tension: 0.2, 
+        pointRadius: 5
       }
     ]
   }
+
     const options = {
     responsive: true,
     onClick: (event:any, elements:any) => {
@@ -71,7 +88,7 @@ export default function LineChart({ data, handlePointClick }: Props){
       y: {
         title: {
           display: true,
-          text: "PDOP"
+          text: "DOP value"
         },
         beginAtZero: true
       }
@@ -79,8 +96,8 @@ export default function LineChart({ data, handlePointClick }: Props){
   }
 
   return (
-    <div style={{height: "300px"}}>
-      <p>Click on a point in the map or in the DOP chart to display Skyplot (Scroll down)</p>
+    <div style={{height: "500px"}}>
+       <p>Click on a point in the map or in the DOP chart to display Skyplot (Scroll down)</p>
       <Line data={chartData} options={options} />
     </div>
   )
