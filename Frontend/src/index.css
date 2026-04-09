@@ -246,3 +246,20 @@ map page */
   margin-right: 6px;
   border-radius: 3px;
 }
+
+
+.loader{
+  margin-top: 2%;
+  margin-left: 20%;
+  border: 8px solid #749e7f;
+  border-radius: 50%;
+  border-top: 8px solid #DFE7CB;
+  width: 20px;
+  height: 20px;
+  animation: spin 1.5s linear infinite;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}

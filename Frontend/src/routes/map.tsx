@@ -99,10 +99,12 @@ function MapPage({
     return null
   }
 
-  return (
+  
+
+return (
     <div style={{ height: "75%", width: "100%" }}>
       <MapContainer center={[63.4305, 10.3951]} zoom={13} style={{ height: "100%", width: "100%" }}>
-        <div className="PDOP-colorchart">
+        {/* <div className="PDOP-colorchart">
           <h4>PDOP</h4>
           <div><span style={{ background: "green" }}></span> &lt; 1</div>
           <div><span style={{ background: "#43c150" }}></span> 1 - 2</div>
@@ -111,7 +113,7 @@ function MapPage({
           <div><span style={{ background:"#fb8824" }}></span> 10-20</div>
           <div><span style={{ background: "red" }}></span> &gt; 20</div>
           <div><span style={{ background: "black" }}></span> No DOP, &lt; 4 satellites</div>
-        </div>
+        </div> */}
         <UpdateCenterMap center = {start} />
          preferCanvas={false}
 
@@ -138,7 +140,7 @@ function MapPage({
       <CircleMarker
         key={idx}
         center={[lat, lon]}
-        radius={6}
+        radius={3}
         pathOptions={{
           color: dopColor(pdop),
           fillColor: dopColor(pdop),
@@ -148,7 +150,11 @@ function MapPage({
           click: () => onPointClick(idx)
         }}
       > 
+ 
       <Tooltip direction="top" offset={[0, -5]}>
+        <b>Point: {idx}</b>
+        <br />
+        <br />
         <b> PDOP: </b><b>{pdop === 0 ? "X" : pdop.toFixed(3)}</b>
         <br />
         {pdop === 0 ? (

@@ -2,7 +2,7 @@ from flask import Flask, render_template, jsonify, request
 from flask_cors import CORS
 import numpy as np
 from pyproj import Transformer
-from skyplot_backend import compute_skyplot_data, compute_skyplot_terrain
+from skyplot_backend import compute_skyplot_terrain
 from roads import hent_veglenkesekvenser_rute, dele_veilinje
 from datetime import datetime
 from sat_with_terrain import main
@@ -194,7 +194,7 @@ def skyplot_terrain():
         return jsonify({"error":"Run /api/dop first"}),400
 
     data_dict = list(dictionary_dop_terrain.values())[index]
-
+    
     data = compute_skyplot_terrain(
         data_dict,
         OBS_TIME,

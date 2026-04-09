@@ -34,8 +34,7 @@ def find_satellites(df, day, year, observation_time):
             row = (onlySpesificSatRows['toe'] - t_obs).abs().idxmin()
             closest_row = df.loc[row]
             rows.append(closest_row)
-
-    
+            
     df_with_satellites_for_time = pd.DataFrame(rows)
 
     for index, row in df_with_satellites_for_time.iterrows():
@@ -66,11 +65,10 @@ def find_satellites_GLONASS(df, day, year, observation_time):
 
         onlySpesificSatRows = df[df['sat'] == satname]
         underOrEqual  = onlySpesificSatRows[onlySpesificSatRows['time_ref'] <= t_obs]
-       
 
         if not underOrEqual.empty:
             row = (t_obs - underOrEqual['time_ref']).abs().idxmin()
-            
+ 
         
         else: 
             row = (onlySpesificSatRows['time_frame'] - t_obs).abs().idxmin()

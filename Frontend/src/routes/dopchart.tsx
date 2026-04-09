@@ -24,6 +24,7 @@ type ChartPoint = {
 type Props = {
   data: ChartPoint[]
   handlePointClick: (index: number) => void
+  
 }
 
 function dopColor(dop: number){

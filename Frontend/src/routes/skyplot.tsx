@@ -48,7 +48,7 @@ function Skyplot({ data }: SkyplotProps) {
 const createTraceElevation = (maxelev: any) =>{
   const az = Object.keys(maxelev).map(Number);
   const elev =  Object.values(maxelev).map(Number);
-   
+
   // lukke polygonet
   const azClosed = [...az, az[0]];
   const elevClosed = [...elev.map((e:number) => 90-e), 90-elev[0]]
@@ -57,7 +57,11 @@ const createTraceElevation = (maxelev: any) =>{
     mode: "lines",
     theta: azClosed,
     r: elevClosed,
-
+    name: "Terrain mask",
+    customdata: [...elev, elev[0]],
+    hovertemplate:
+      "Max elevation in horizon: %{customdata:.1f}°<br>" +
+      "Azimuth: %{theta}°<extra></extra>",
     line: {
       color:"red",
       width: 2,
@@ -65,8 +69,28 @@ const createTraceElevation = (maxelev: any) =>{
 
   };
 };
-  const maxElevTrace = createTraceElevation(data.maxElevation);
-  
+
+  const createMaskangleTrace = (maskangle: number) =>{
+    const az = Array.from({length: 361}, (_, i) => i);
+    return{ 
+    type: "scatterpolar", 
+    mode: "lines",
+    theta: az,
+    r: az.map(()=>90-maskangle),
+    name: "Mask angle",
+    hoverinfo: "skip",
+    line: {
+      color:"rgba(255,0,0,0.5)",
+      width: 1,
+      dash: "dash",
+    },
+    };
+  };
+
+  const maxElevTrace = createTraceElevation(data.max_elevation);
+
+  const Maskangle = createMaskangleTrace(data.maskElevation)
+
   const dateSkyplot = julianToDate(data.date.slice(3,8), data.date.slice(0,3));
   
   const allSatellites = [
@@ -78,29 +102,32 @@ const createTraceElevation = (maxelev: any) =>{
   return (
     <div style={{ padding: "5px", background: "white" }}>
       <h3>Skyplot</h3>
-        <div style={{background: "pink"}}>
+        <div style={{background: "white"}}>
           <p>Date: {dateSkyplot.toLocaleDateString("no-NO")}  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Observation Time: {data.time}</p>
-          <p>Available satellites: 
+          <p>Available satellites: {data.GPS?.sat?.length || 0} &nbsp;GPS,  &nbsp;&nbsp;&nbsp;{data.Galileo?.sat?.length || 0}&nbsp; Galileo,  &nbsp;&nbsp;&nbsp; {data.Beidou?.sat?.length || 0}&nbsp; Beidou,  &nbsp;&nbsp;&nbsp; {data.Glonass?.sat?.length || 0} &nbsp;Glonass
           </p>
+          <div style={{background: "white"}}>
           <p>
-            GPS: {data.GPS?.sat?.join(", ") || "-"}
+            <b>GPS: </b> {data.GPS?.sat?.join(", ") || "-"}
           </p>
 
           <p>
-            Galileo: {data.Galileo?.sat?.join(", ") || "-"}
+            <b> Galileo: </b> {data.Galileo?.sat?.join(", ") || "-"}
+          
           </p>
 
           <p>
-            BeiDou: {data.Beidou?.sat?.join(", ") || "-"}
+            <b> BeiDou: </b> {data.Beidou?.sat?.join(", ") || "-"}
           </p>
 
           <p>
-            GLONASS: {data.Glonass?.sat?.join(", ") || "-"}
+            <b> GLONASS: </b> {data.Glonass?.sat?.join(", ") || "-"}
           </p>
+          </div>
       </div>
       <div style={{ width: "100%", height: "600px" }}>
         <Plot
-          data={[...traces, maxElevTrace]}
+          data={[...traces, maxElevTrace,Maskangle]}
           layout={{
             polar: {
               radialaxis: {

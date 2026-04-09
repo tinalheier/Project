@@ -23,6 +23,7 @@ function getUTMNumbers(text: string): UTM {
     return {east, north}
 }
 
+
 function UTM33ToLatLng(utm: UTM): LatLng{
     if (!utm) return null
 
@@ -60,6 +61,8 @@ function Frontpage() {
 
     const [dopChartData, setDopChartData] = useState<{ distance: number; pdop: number; gdop: number; lat: number; lon: number}[]>([])
 
+    const [pageLoad, setPageLoad] = useState(false)
+
     function roadAnalysis(){
 
         if (!startUtm || !endUtm){
@@ -75,7 +78,8 @@ function Frontpage() {
         setErrorMessage(null)
     
         setButtonClick(true)
-     
+        
+        setPageLoad(true)
         fetch(
           `http://127.0.0.1:5000/api/dop?` +
           `start_e=${startUtm.east}` +
@@ -99,8 +103,13 @@ function Frontpage() {
           }
           setDopPoints(data.features)
           setDopChartData(data.chart)
+          setRoute([])
         })
         .catch(console.error)
+        .finally(() => {
+            setPageLoad(false)
+         })
+
       }
  
            
@@ -124,6 +133,7 @@ function Frontpage() {
     }, [startUtm, endUtm])
 
     function handlePointClick(index:number){
+    
     fetch(
     `http://127.0.0.1:5000/api/skyplot_terrain?` +
     `index=${index}` +
@@ -143,11 +153,26 @@ function Frontpage() {
 
 
     function handleResetClick(){
+        if (pageLoad){
+            setPageLoad(false)
+        }
+        
         setSkyplotData(null)
-   
-    
         setDopChartData([])
+        setDopPoints([])
+        
     }
+
+
+    function getDateYesterday(){
+        const today = new Date()
+
+        today.setDate(today.getDate() - 1)
+        today.setHours(23, 59, 0, 0)
+
+        return today.toISOString().slice(0,16)
+    }
+
 
     return (
       <div className="frontpage">
@@ -156,21 +181,21 @@ function Frontpage() {
                 <p>
                     Start Point (UTM33)
                 </p>
-                <input className="coordInput"  placeholder="E, N (f.eks. 270239.58,7040945.2)" value={startText} 
+                <input className="coordInput"  placeholder="E, N (f.eks. 270239.58,7040945.2 or Click on map)" value={startText} 
                 onChange={(e) => setStartText(e.target.value)}/>
             </div>
             <div className="points"> 
                 <p>
                     End Point (UTM33)
                 </p>
-                <input className="coordInput" placeholder="E, N (f.eks. 270239.58,7040945.2)" value={endText} 
+                <input className="coordInput" placeholder="E, N (f.eks. 270239.58,7040945.2  or Click on map)" value={endText} 
                 onChange={(e) => setEndText(e.target.value)}/>
             </div>
             <div className="points">
                 <p>
                     Observation time (UTC)
                 </p>
-                <input type="datetime-local" value = {date} 
+                <input type="datetime-local" min='2013-01-01 00:00:00' max = {getDateYesterday()} value = {date} 
                 onChange={(e) => setDate(e.target.value)}/>
             </div>
             <div id ="gnss-systems">
@@ -219,7 +244,10 @@ function Frontpage() {
         <div className="right">
             <MapPage start={startLatLng}  end={endLatLng} route={route} dopPoints={dopPoints} onPointClick={handlePointClick} onResetClick={handleResetClick} setStartUtmText={(utmText: string) => setStartText(utmText)}
           setEndUtmText={(utmText: string) => setEndText(utmText)}/>
-
+            
+                {pageLoad && (
+                    <div className="loader"></div>
+                )}
             <div className="boks">
                 {dopChartData.length > 0 && (
                     <LineChart data = {dopChartData} handlePointClick = {handlePointClick}/>
@@ -230,11 +258,10 @@ function Frontpage() {
                 )}
 
             </div>
-           
-        
         </div>
       </div>
     )
+    
   }
   
   export default Frontpage

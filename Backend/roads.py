@@ -20,19 +20,35 @@ def hent_veglenkesekvenser_rute(startpunkt, sluttpunkt): #utm33 koord
     start = f"{startpunkt[0]},{startpunkt[1]}"
     slutt = f"{sluttpunkt[0]},{sluttpunkt[1]}"
 
-    params = {
-     "start": start,
-     "slutt": slutt,
-     "maks_avstand": 700,
-     "omkrets": 10000,
-     "konnekteringslenker": "true"
-    }
+    omkrets_verdier = [100, 500, 1000, 5000, 10000, 15000]
+    
+    def fetch(omkrets):
+        params = {
+        "start": start,
+        "slutt": slutt,
+        "maks_avstand": 700,
+        "omkrets": omkrets,
+        "konnekteringslenker": "true"
+        }
 
-    r = requests.get(url, headers=HEADERS, params=params)
+        r = requests.get(url, headers=HEADERS, params=params)
 
-    print("STATUS:", r.status_code)
+        print("STATUS:", r.status_code)
 
-    r.raise_for_status()
+        return r
+
+    r = None
+
+    for omkrets in omkrets_verdier:
+        r = fetch(omkrets)
+
+
+        status = r.json().get("metadata", {}).get("status_tekst")
+
+        if status != "IKKE_FUNNET_RUTE":
+            break
+        
+    print(r.url)
 
     data = r.json()
 
@@ -59,51 +75,11 @@ def hent_veglenkesekvenser_rute(startpunkt, sluttpunkt): #utm33 koord
 
     return merged_road
 
-# def getTunnel(road_shaplyobj):
-
-#     #hent_veglenkesekvenser_rute returnerer et shapely objekt
-#     minx, miny, maxx, maxy = road_shaplyobj.bounds
-#     bbox = f"{minx},{miny},{maxx},{maxy}"
-
-    
-
-#     url = "https://nvdbapiles.atlas.vegvesen.no/vegobjekter/api/v4/vegobjekter/67"
-
-#     HEADERS = {
-#         "X-Client": "tina-heier-ntnu-gnss"
-#     }
-
-
-#     params = {
-#         "inkluder": "vegsegmenter",
-#         "kartutsnitt": bbox
-#     }
-
-#     r = requests.get(url, headers=HEADERS, params=params)
-
-#     r.raise_for_status()
-
-#     tunnell_linestrings = []
-#     data = r.json()
-#     for obj in data["objekter"]:
-#         for seg in obj["vegsegmenter"]:
-#             geom = wkt.loads(seg["geometri"]["wkt"])
-#             tunnell_linestrings.append(geom)
-
-#     if len(tunnell_linestrings) == 0:
-#         return None
-    
-#     return union_all(tunnell_linestrings)
-
 
 #Dele veilinjen i masse ulike deler, med step som avstand og får koord i x,y z UTM33
 def dele_veilinje(startpunkt, sluttpunkt, step):
     
     veglinje = hent_veglenkesekvenser_rute(startpunkt, sluttpunkt)
-    # tunneller = getTunnel(veglinje)
-
-    # tunnel_part = veglinje.intersection(tunneller)
-    
 
     length = veglinje.length
     distances = np.arange(0, length + step, step)
@@ -125,12 +101,15 @@ def dele_veilinje(startpunkt, sluttpunkt, step):
     return points
 
 
-# # startpunkt = 270239.58,7040945.2 #samf
-# # sluttpunkt = 270356.96,7039392.78
+# # # startpunkt = 270239.58,7040945.2 #samf
+# # # sluttpunkt = 270356.96,7039392.78
 
 # startpunkt = 268275.10701,7042069.63928 #tunell
 # sluttpunkt = 268728.84744,7041977.67557
 
+# # startpunkt = 237101.15574,6984448.33133 #5000 omkrets blir for lite
+# # sluttpunkt = 251626.79789,6983869.25654
+
 # rute = hent_veglenkesekvenser_rute(startpunkt, sluttpunkt)
 
-# print(dele_veilinje(startpunkt, sluttpunkt, 10))
+# # print(dele_veilinje(startpunkt, sluttpunkt, 10))
