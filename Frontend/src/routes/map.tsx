@@ -4,7 +4,6 @@ import L from "leaflet"
 import proj4 from "proj4"
 import start from '../assets/start.png'
 import end from '../assets/end.png'
-import markerIcon from "leaflet/dist/images/marker-icon.png"
 import { useEffect, useState, useRef} from "react"
 
 const defaultIconStart = L.icon({ iconUrl: start, iconSize: [30, 47] })

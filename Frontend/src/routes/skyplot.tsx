@@ -93,12 +93,6 @@ const createTraceElevation = (maxelev: any) =>{
 
   const dateSkyplot = julianToDate(data.date.slice(3,8), data.date.slice(0,3));
   
-  const allSatellites = [
-  ...(data.GPS?.sat || []),
-  ...(data.Galileo?.sat || []),
-  ...(data.Beidou?.sat || []),
-  ...(data.Glonass?.sat || []),
-];
   return (
     <div style={{ padding: "5px", background: "white" }}>
       <h3>Skyplot</h3>
