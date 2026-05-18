@@ -15,6 +15,9 @@ app = Flask(__name__)
 tf = Transformer.from_crs("EPSG:25833", "EPSG:4326", always_xy=True)
 ecef_to_latlon = Transformer.from_crs("EPSG:4978", "EPSG:4326", always_xy=True)
 CORS(app)
+@app.route("/")
+def home():
+    return "Backend is running"
 
 
 
