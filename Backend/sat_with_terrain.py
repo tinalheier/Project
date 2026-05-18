@@ -13,9 +13,6 @@ from DOPcalculation import designMatrixA
 from emphererides_file import get_ephemerides, load_ephemerides
 
 
-# horizon_mask_360(pointA, az_step, buffer, step) #Lat og long
-# dele_veilinje(startpunkt, sluttpunkt, step): #UTM33
-
 
 #Fra UTM zone 33N til WGS84 Earth-Centered Earth-Fixed (ECEF)
 tf = Transformer.from_crs("EPSG:25833", "EPSG:4978", always_xy=True)
@@ -168,20 +165,16 @@ def find_max_elev_horizon_360(raster_path, startpunkt, sluttpunkt, step_vei, ste
 # startpunkt = 49379.22356892761,6773638.5790781425
 # sluttpunkt = 87964.31359693682,6767233.745804535
 
-startpunkt = 142398.69439,6928687.97469
-sluttpunkt = 142325.57159,6928821.07366
-Day = 115
-year = 2025
-OBS_TIME = "101000"
+# startpunkt = 142398.69439,6928687.97469
+# sluttpunkt = 142325.57159,6928821.07366
+# Day = 115
+# year = 2025
+# OBS_TIME = "101000"
 
 
-active_GNSS = {
-    "GPS": True,
-    "Galileo": False,
-    "Beidou": False,
-    "Glonass": False
-}
-
-hey = main(startpunkt, sluttpunkt, Day, year, OBS_TIME, 10, active_GNSS )
-
-
+# active_GNSS = {
+#     "GPS": True,
+#     "Galileo": False,
+#     "Beidou": False,
+#     "Glonass": False
+# }

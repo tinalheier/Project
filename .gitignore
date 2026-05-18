@@ -4,6 +4,7 @@ Backend/data/
 .env
 *.pyc
 cookies.txt
+Backend/main_analysis.py
 
 
 

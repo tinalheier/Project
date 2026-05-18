@@ -172,7 +172,7 @@ def plot_skyplot(data):
           
 
     # Plot alle GNSS
-    plot_system(data["GPS"], "GPS", "blue")
+    # plot_system(data["GPS"], "GPS", "blue")
     # plot_system(data["Galileo"], "Galileo", "green")
     # plot_system(data["Beidou"], "Beidou", "orange")
     # plot_system(data["Glonass"], "GLONASS", "red")
@@ -190,6 +190,3 @@ def plot_skyplot(data):
     plt.show()
 
 
-yey = compute_skyplot_data("115", "2025", "100000", [142384.43704,6928715.24470, 308],0)
-
-plot_skyplot(yey)

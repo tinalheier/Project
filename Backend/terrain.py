@@ -85,15 +85,3 @@ def horizon_mask_360(src, pointA, az_step, buffer, step):
 
 
 
-
-
-# # testing
-
-# src = rasterio.open('Backend/data/DTM_trd.tif')       
-
-# point_testA= 270239.58,7040945.2, 20 #samf
-# # point_testA= [10.3817288, 63.4144650] #longitude, latitude
-# # point_testB= [10.3707799, 63.4176188] #longitude, latitude, nb, dette funker ikke, pga utm
-
-
-# # print(horizon_mask_360(src, point_testA, 4, 5000, 10))

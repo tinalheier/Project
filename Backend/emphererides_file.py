@@ -313,5 +313,3 @@ def read_rinex_file(filename):
 
 def split_rinex_line(line):
     return [line[i:i+19].strip() for i in range(4, len(line), 19) if line[i:i+19].strip()]
-
-

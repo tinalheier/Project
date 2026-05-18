@@ -71,7 +71,7 @@ def find_satellites_GLONASS(df, day, year, observation_time):
  
         
         else: 
-            row = (onlySpesificSatRows['time_frame'] - t_obs).abs().idxmin()
+            row = (onlySpesificSatRows['time_ref'] - t_obs).abs().idxmin()
         
 
         closest_row = df.loc[row]
@@ -227,7 +227,3 @@ def rotation_matrix(degree):
                      [0, 0, 1]])
  
     return rot_1, rot_2, rot_3
-
-
-
-

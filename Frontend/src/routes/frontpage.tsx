@@ -1,9 +1,8 @@
 import MapPage from "./map"
-import { useEffect, useMemo, useState } from "react"
+import { useEffect, useMemo, useRef, useState } from "react"
 import proj4 from "proj4"
 import Skyplot from "./skyplot"
 import LineChart from "./dopchart"
-
 
 proj4.defs("EPSG:25833", "+proj=utm +zone=33 +ellps=GRS80 +towgs84=0, 0, 0, 0, 0, 0, 0 +units=m +no_defs")
 
@@ -23,14 +22,12 @@ function getUTMNumbers(text: string): UTM {
     return {east, north}
 }
 
-
 function UTM33ToLatLng(utm: UTM): LatLng{
     if (!utm) return null
 
     const[lon, lat] = proj4("EPSG:25833", "EPSG:4326", [utm.east, utm.north]) as [number, number]
     return [lat, lon]
 }
-
 
  
 function Frontpage() {
@@ -47,7 +44,6 @@ function Frontpage() {
         Glonass: true,
     });
     const [errorMessage, setErrorMessage] = useState<string | null>(null)
-    const [buttonClick, setButtonClick] = useState(false)
     const [skyplotData, setSkyplotData] = useState<any | null>(null)
 
     const startUtm = useMemo(() => getUTMNumbers(startText), [startText])
@@ -58,10 +54,35 @@ function Frontpage() {
 
     const [dopPoints, setDopPoints] = useState<any[]>([])
 
-
     const [dopChartData, setDopChartData] = useState<{ distance: number; pdop: number; gdop: number; lat: number; lon: number}[]>([])
 
     const [pageLoad, setPageLoad] = useState(false)
+    const skyplotRef = useRef<HTMLDivElement | null>(null)
+    const rightRef = useRef<HTMLDivElement | null>(null)
+
+    const parseApiResponse = async <T,>(response: Response): Promise<T> => {
+      const payload = await response.json().catch(() => ({}))
+      if (!response.ok) {
+        const message = payload?.error || payload?.message || (response.status >= 500 ? "Server error. Try again later." : "Request failed.")
+        throw new Error(message)
+      }
+      return payload as T
+    }
+
+    useEffect(() => {
+      if (!skyplotData || !skyplotRef.current) return
+      const target = skyplotRef.current
+      const container = rightRef.current
+
+      if (container) {
+        const containerRect = container.getBoundingClientRect()
+        const targetRect = target.getBoundingClientRect()
+        const offset = targetRect.top - containerRect.top
+        container.scrollTo({ top: container.scrollTop + offset - 16, behavior: "smooth" })
+      } else {
+        target.scrollIntoView({ behavior: "smooth", block: "start" })
+      }
+    }, [skyplotData])
 
     function roadAnalysis(){
 
@@ -77,8 +98,6 @@ function Frontpage() {
 
         setErrorMessage(null)
     
-        setButtonClick(true)
-        
         setPageLoad(true)
         fetch(
           `http://127.0.0.1:5000/api/dop?` +
@@ -93,19 +112,25 @@ function Frontpage() {
           `&glonass=${selectedSystems.Glonass}` +
           `&mask=${mask}`
         )
-        .then(r => r.json())
-        .then(data => {
+        .then(parseApiResponse)
+        .then((data: any) => {
           if (!data?.features) {
-            console.error("No features in response:", data)
+            setErrorMessage("Could not load DOP data from server.")
             setDopPoints([])
             setDopChartData([])
             return
           }
+          setErrorMessage(null)
           setDopPoints(data.features)
           setDopChartData(data.chart)
           setRoute([])
         })
-        .catch(console.error)
+        .catch((err) => {
+          console.error(err)
+          setErrorMessage(err.message)
+          setDopPoints([])
+          setDopChartData([])
+        })
         .finally(() => {
             setPageLoad(false)
          })
@@ -122,14 +147,18 @@ function Frontpage() {
         }
 
         fetch(`http://127.0.0.1:5000/api/route?start_e=${startUtm.east}&start_n=${startUtm.north}&end_e=${endUtm.east}&end_n=${endUtm.north}`)
-        
-        .then(r => r.json())
-        .then(geo =>{
+        .then(parseApiResponse)
+        .then((geo: any) => {
             const coords = geo.geometry.coordinates
             const latlngs = coords.map(([lon, lat]: [number, number]) => [lat,lon])
             setRoute(latlngs)
+            setErrorMessage(null)
         })
-        .catch(console.error)
+        .catch((err) => {
+            console.error(err)
+            setErrorMessage("Route failed. Try to choose new start and end point")
+            setRoute([])
+        })
     }, [startUtm, endUtm])
 
     function handlePointClick(index:number){
@@ -151,7 +180,6 @@ function Frontpage() {
   })
     }
 
-
     function handleResetClick(){
         if (pageLoad){
             setPageLoad(false)
@@ -160,9 +188,9 @@ function Frontpage() {
         setSkyplotData(null)
         setDopChartData([])
         setDopPoints([])
+        setErrorMessage(null)
         
     }
-
 
     function getDateYesterday(){
         const today = new Date()
@@ -172,7 +200,6 @@ function Frontpage() {
 
         return today.toISOString().slice(0,16)
     }
-
 
     return (
       <div className="frontpage">
@@ -241,27 +268,36 @@ function Frontpage() {
                 <button className = "roadbutton" onClick ={roadAnalysis}> DOP analysis </button>
             </div>
         </div>
-        <div className="right">
-            <MapPage start={startLatLng}  end={endLatLng} route={route} dopPoints={dopPoints} onPointClick={handlePointClick} onResetClick={handleResetClick} setStartUtmText={(utmText: string) => setStartText(utmText)}
-          setEndUtmText={(utmText: string) => setEndText(utmText)}/>
-            
-                {pageLoad && (
-                    <div className="loader"></div>
-                )}
+        <div className="right" ref={rightRef}>
+            <MapPage
+              start={startLatLng}
+              end={endLatLng}
+              route={route}
+              dopPoints={dopPoints}
+              onPointClick={handlePointClick}
+              onResetClick={handleResetClick}
+              setStartUtmText={(utmText: string) => setStartText(utmText)}
+              setEndUtmText={(utmText: string) => setEndText(utmText)}
+            />
+
+            {pageLoad && (
+              <div className="loader"></div>
+            )}
+
             <div className="boks">
-                {dopChartData.length > 0 && (
-                    <LineChart data = {dopChartData} handlePointClick = {handlePointClick}/>
-                )}
+              {dopChartData.length > 0 && (
+                <LineChart data={dopChartData} handlePointClick={handlePointClick} />
+              )}
 
-                 {skyplotData && (
-                    <Skyplot data ={skyplotData} />
-                )}
-
+              {skyplotData && (
+                <div ref={skyplotRef}>
+                  <Skyplot data={skyplotData} />
+                </div>
+              )}
             </div>
         </div>
       </div>
     )
-    
-  }
-  
-  export default Frontpage
+}
+
+export default Frontpage

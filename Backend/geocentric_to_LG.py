@@ -154,14 +154,3 @@ def dataframeExists(day, year, base_path):
         return False
     
     return True
-
-
-# DAY = 35
-# yEAR = 2025
-
-# OBS_TIME = "033000"
-# RECEIVER_COORD = np.array([3146294.9, 595984.2, 5491077.6])
-
-# MASK_ELEVATION = 45
-
-# print(azimuth_and_zenith(DAY, yEAR, OBS_TIME, RECEIVER_COORD, MASK_ELEVATION))

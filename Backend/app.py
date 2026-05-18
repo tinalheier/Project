@@ -35,11 +35,11 @@ def route():
         )
 
         if merged_road is None:
-            return jsonify({"error": "No route found"}), 400
+            return jsonify({"error": "Could not find route. Try to select a new start and end point"}), 400
 
         coords = []
 
-        # håndter MultiLineString og LineString
+
         if merged_road.geom_type == "MultiLineString":
             lines = merged_road.geoms
         else:

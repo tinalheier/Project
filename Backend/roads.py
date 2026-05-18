@@ -101,6 +101,7 @@ def dele_veilinje(startpunkt, sluttpunkt, step):
     return points
 
 
+
 # # # startpunkt = 270239.58,7040945.2 #samf
 # # # sluttpunkt = 270356.96,7039392.78
 
