@@ -32,7 +32,7 @@ function ClickHandler({
   setEndUtmText?: (v: string) => void
 }) {
   useMapEvents({
-    click(e) {
+    click(e: L.LeafletMouseEvent) {
       const point: [number, number] = [e.latlng.lat, e.latlng.lng]
 
       if (!start) {
