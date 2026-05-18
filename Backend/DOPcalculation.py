@@ -15,6 +15,7 @@ def DOPChart(dictionary):
 
         x, y, z = point
         pdop = data["PDOP"]
+        gdop = data["GDOP"]
 
         if prev_point is not None:
             x0, y0, z0 = prev_point
@@ -23,7 +24,8 @@ def DOPChart(dictionary):
         
         json.append({
             "distance": round(dist, 2),
-            "pdop": pdop
+            "pdop": pdop,
+            "gdop": gdop
         })
 
         prev_point = point
@@ -33,8 +35,6 @@ def DOPChart(dictionary):
 # [{'distance': 0, 'pdop': 1.2868450927455393}, {'distance': 23.466972489751402, 'pdop': 28.984801418400007}]
 
 def designMatrixA(dictionary, active_GNSS):
-
-
     for point, systems in dictionary.items():
 
         x_r, y_r, z_r = point
@@ -53,6 +53,7 @@ def designMatrixA(dictionary, active_GNSS):
         
         if satellites_len < 4:
             dictionary[point]["PDOP"] = 0
+            dictionary[point]["GDOP"] = 0
             continue
 
 
@@ -66,6 +67,7 @@ def designMatrixA(dictionary, active_GNSS):
             dx =  x_s - x_r
             dy =  y_s - y_r
             dz =  z_s - z_r
+            
 
             r_vector = np.sqrt((dx**2) + (dy**2) + (dz**2))
 
@@ -77,7 +79,9 @@ def designMatrixA(dictionary, active_GNSS):
 
 
         PDOP = np.sqrt(Q[0][0]+Q[1][1]+Q[2][2])
+        GDOP = np.sqrt(Q[0][0]+Q[1][1]+Q[2][2]+Q[3][3])
         dictionary[point]["PDOP"] = PDOP
+        dictionary[point]["GDOP"] = GDOP
 
       #REGN UT GDOP også
 

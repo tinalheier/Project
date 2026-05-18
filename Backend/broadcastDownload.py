@@ -39,4 +39,3 @@ def download(day, year):
 
     
     return rnx_path
-

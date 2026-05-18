@@ -2,7 +2,7 @@ from flask import Flask, render_template, jsonify, request
 from flask_cors import CORS
 import numpy as np
 from pyproj import Transformer
-from skyplot_backend import compute_skyplot_data
+from skyplot_backend import compute_skyplot_terrain
 from roads import hent_veglenkesekvenser_rute, dele_veilinje
 from datetime import datetime
 from sat_with_terrain import main
@@ -17,11 +17,9 @@ ecef_to_latlon = Transformer.from_crs("EPSG:4978", "EPSG:4326", always_xy=True)
 CORS(app)
 
 
-# TEXTFILE = "BRDC00IGS_R_20251260000_01D_MN.rnx" #Endre denne hvis filvei endres
-# DATE = "20250506"
-# OBS_TIME = "033000"
-# RECEIVER_COORD = np.array([3146294.9, 595984.2, 5491077.6])
-# MASK_ELEVATION = 45
+
+dictionary_dop_terrain = None
+
 
 @app.get("/api/route")
 def route():
@@ -37,11 +35,11 @@ def route():
         )
 
         if merged_road is None:
-            return jsonify({"error": "No route found"}), 400
+            return jsonify({"error": "Could not find route. Try to select a new start and end point"}), 400
 
         coords = []
 
-        # håndter MultiLineString og LineString
+
         if merged_road.geom_type == "MultiLineString":
             lines = merged_road.geoms
         else:
@@ -85,12 +83,14 @@ def dop():
         gps = request.args.get("gps") == "true"
         galileo = request.args.get("galileo") == "true"
         beidou = request.args.get("beidou") == "true"
+        glonass = request.args.get("glonass") == "true"
         mask = float(request.args.get("mask", 10))
 
         active_GNSS = {
             "GPS": gps,
             "Galileo": galileo,
-            "Beidou": beidou
+            "Beidou": beidou,
+            "Glonass": glonass
         }
 
 
@@ -110,16 +110,27 @@ def dop():
 
     
         dop_dict = main((start_e, start_n), (end_e, end_n), julian, year, OBS_TIME, mask, active_GNSS)
+        global dictionary_dop_terrain
+
+        dictionary_dop_terrain = dop_dict
         chart = DOPChart(dop_dict)
         features = []
 
-        for coord, data in dop_dict.items():
+        for i, (coord, data) in enumerate(dop_dict.items()):
 
             if "PDOP" not in data:
                 pdop = 0
+
             
             else:
                 pdop = data["PDOP"]
+
+            
+            if "GDOP" not in data:
+                gdop = 0
+            
+            else:
+                gdop = data["GDOP"]
 
             x, y, z = coord
             lon, lat, _ = ecef_to_latlon.transform(x, y, z)
@@ -131,7 +142,9 @@ def dop():
                     "coordinates": [lon, lat]
                 },
                 "properties": {
-                    "pdop": float(pdop)
+                    "pdop": float(pdop),
+                    "gdop": float(gdop),
+                    "index": i
                 }
             })
 
@@ -146,13 +159,24 @@ def dop():
         print("DOP ERROR:", e)
         return jsonify({"error": str(e)}), 500
 
-@app.get("/api/skyplot")
-def skyplot():
 
-    lon = float(request.args["lon"])
-    lat = float(request.args["lat"])
+@app.get("/api/skyplot_terrain")
+def skyplot_terrain():
+
+    index = int(request.args["index"])
     date = request.args["date"]
-    mask = float(request.args.get("mask", 10))
+    mask = float(request.args.get("mask",10))
+    gps = request.args.get("gps") == "true"
+    galileo = request.args.get("galileo") == "true"
+    beidou = request.args.get("beidou") == "true"
+    glonass = request.args.get("glonass") == "true"
+
+    active_GNSS = {
+            "GPS": gps,
+            "Galileo": galileo,
+            "Beidou": beidou,
+            "Glonass": glonass
+        }
 
     dt = datetime.fromisoformat(date)
 
@@ -164,12 +188,20 @@ def skyplot():
     julian = d.timetuple().tm_yday
 
 
-    transformer = Transformer.from_crs("EPSG:4326","EPSG:4978", always_xy=True)
+    global dictionary_dop_terrain
 
-    x,y,z = transformer.transform(lon, lat, 0)
+    if dictionary_dop_terrain is None:
+        return jsonify({"error":"Run /api/dop first"}),400
 
-    data = compute_skyplot_data(
-        julian, year, OBS_TIME, np.array([x,y,z]),mask
+    data_dict = list(dictionary_dop_terrain.values())[index]
+    
+    data = compute_skyplot_terrain(
+        data_dict,
+        OBS_TIME,
+        julian,
+        year,
+        mask,
+        active_GNSS,
     )
 
     return jsonify(data)

@@ -54,4 +54,3 @@ def combine_tifs(startPoint, endPoint, folder_path = "/Backend/data/DTM_nasjonal
     print("Ny raster lagret:", out_path)
 
     return out_path
-

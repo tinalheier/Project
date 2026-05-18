@@ -2,13 +2,14 @@ import numpy
 import pandas as pd
 import os
 from broadcastDownload import download
+from datetime import datetime
 
 df_folder = "data/dataFrames/"
 os.makedirs(df_folder, exist_ok=True)
 
 def get_ephemerides(day, year):
     rinex_path = download(day, year) 
-    GPS, Galileo, BeiDou = read_rinex_file(rinex_path)
+    GPS, Galileo, BeiDou, Glonass = read_rinex_file(rinex_path)
 
     day_folder = os.path.join(df_folder, str(year), str(day).zfill(3))
     os.makedirs(day_folder, exist_ok=True)
@@ -16,18 +17,20 @@ def get_ephemerides(day, year):
     gps_path = os.path.join(day_folder, f"GPS.pkl")
     gal_path = os.path.join(day_folder, f"Galileo.pkl")
     bei_path = os.path.join(day_folder, f"BeiDou.pkl")
+    glo_path = os.path.join(day_folder, f"Glonass.pkl")
     
     GPS.to_pickle(gps_path)
     Galileo.to_pickle(gal_path)
     BeiDou.to_pickle(bei_path)
+    Glonass.to_pickle(glo_path)
 
 
 def load_ephemerides(day, year, base_path):
     GPS = pd.read_pickle(os.path.join(base_path, "GPS.pkl"))
     Galileo = pd.read_pickle(os.path.join(base_path, "Galileo.pkl"))
     Beidou = pd.read_pickle(os.path.join(base_path, "BeiDou.pkl"))
-
-    return GPS, Galileo, Beidou
+    Glonass = pd.read_pickle(os.path.join(base_path, "Glonass.pkl"))
+    return GPS, Galileo, Beidou, Glonass
 
 def read_rinex_file(filename):
     Galileo = []
@@ -38,14 +41,12 @@ def read_rinex_file(filename):
 
     with open(filename, "r") as file:
         lines = file.readlines()
-
         
         start_idx = [i for i, l in enumerate(lines) if "END OF HEADER" in l][0]+1
         i = start_idx
     
         
         while i < len(lines):
-    
 
             line =  lines[i].strip()
 
@@ -131,49 +132,38 @@ def read_rinex_file(filename):
                     if j == 0:
                         Clock_Bias = float(split[1])
                         Clock_drift = float(split[2])
-                        tk = float(split[3])
+                        time_ref = float(split[3])
                        
                     elif j == 1:
-                        X = (split[0])
+                        X = float(split[0])* 1000
                         X_dot = float(split[1])
                         X_dotdot = float(split[2])
                         SV_health = float(split[3])
                        
                     elif j == 2:
-                        Y = (split[0])
+                        Y = float(split[0])* 1000
                         Y_dot = float(split[1])
                         Y_dotdot = float(split[2])
                         freq_channel = float(split[3])
                        
 
                     elif j == 3:
-                        Z = (split[0])
+                        Z = float(split[0]) * 1000
                         Z_dot = float(split[1])
                         Z_dotdot = float(split[2])
                         age_of_operation = float(split[3])
                     j += 1
-                   
-        
+                
+    
                 GLONASS.append({
                     "system": "GLONASS",
                     "sat": satellitename,
                     "epoch": yearmonthdate,
                     "UTC_time": UTC_clock,
-                    "Clock_Bias": Clock_Bias,
-                    "Clock_drift": Clock_drift,
-                    "tk": tk,
+                    "time_ref": time_ref,
                     "X": X,
-                    "X_speed": X_dot,
-                    "X_acceleration": X_dotdot,
-                    "SV_health": SV_health,
                     "Y": Y,
-                    "Y_speed": Y_dot,
-                    "Y_acceleration": Y_dotdot,
-                    "freq_channel k": freq_channel,
-                    "Z": Z,
-                    "Z_speed": Z_dot,
-                    "Z_acceleration": Z_dotdot,
-                    "age_of_operation": age_of_operation
+                    "Z": Z
                 })
                     
                 i +=4
@@ -301,7 +291,7 @@ def read_rinex_file(filename):
                     "i_dotdot": i_dotdot
                 })
                 i +=8
-        
+            
 
             elif line.startswith("J") or line.startswith("I"):
                 i +=8
@@ -317,11 +307,9 @@ def read_rinex_file(filename):
     BeiDouDf = pd.DataFrame(BeiDou)
     GLONASSDf = pd.DataFrame(GLONASS)
 
-    
-    return GPSDf, GalileoDf, BeiDouDf
+    return GPSDf, GalileoDf, BeiDouDf, GLONASSDf
 
 
 
 def split_rinex_line(line):
     return [line[i:i+19].strip() for i in range(4, len(line), 19) if line[i:i+19].strip()]
-
