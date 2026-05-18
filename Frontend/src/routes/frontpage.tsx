@@ -3,6 +3,7 @@ import { useEffect, useMemo, useRef, useState } from "react"
 import proj4 from "proj4"
 import Skyplot from "./skyplot"
 import LineChart from "./dopchart"
+const API_URL = import.meta.env.VITE_API_URL;
 
 proj4.defs("EPSG:25833", "+proj=utm +zone=33 +ellps=GRS80 +towgs84=0, 0, 0, 0, 0, 0, 0 +units=m +no_defs")
 
@@ -100,7 +101,7 @@ function Frontpage() {
     
         setPageLoad(true)
         fetch(
-          `http://127.0.0.1:5000/api/dop?` +
+          `${API_URL}/api/dop?` +
           `start_e=${startUtm.east}` +
           `&start_n=${startUtm.north}` +
           `&end_e=${endUtm.east}` +
@@ -146,7 +147,7 @@ function Frontpage() {
             return
         }
 
-        fetch(`http://127.0.0.1:5000/api/route?start_e=${startUtm.east}&start_n=${startUtm.north}&end_e=${endUtm.east}&end_n=${endUtm.north}`)
+        fetch(`${API_URL}/api/route?start_e=${startUtm.east}&start_n=${startUtm.north}&end_e=${endUtm.east}&end_n=${endUtm.north}`)
         .then(parseApiResponse)
         .then((geo: any) => {
             const coords = geo.geometry.coordinates
@@ -164,7 +165,7 @@ function Frontpage() {
     function handlePointClick(index:number){
     
     fetch(
-    `http://127.0.0.1:5000/api/skyplot_terrain?` +
+    `${API_URL}/api/skyplot_terrain?` +
     `index=${index}` +
     `&date=${date}` +
     `&mask=${mask}` +
