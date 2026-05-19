@@ -44,7 +44,7 @@ def combine_tifs(startPoint, endPoint, folder_path=DTM_FOLDER, buffer=10000):
         "transform": transform
     })
 
-    out_path = out_path = os.path.join("/tmp", "merged_raster.tif")
+    out_path = os.path.join(PROJECT_ROOT, "data", "merged", "merged_raster.tif")
 
     os.makedirs(os.path.dirname(out_path), exist_ok=True)
 

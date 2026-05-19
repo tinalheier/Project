@@ -54,7 +54,7 @@ def main(startpunkt, sluttpunkt, day, year, obs_time, maskangle, active_GNSS):
 
 def find_available_sats(day, year, observation_time, maskElevation, max_elev_and_coord):
     day = str(day).zfill(3)
-    base_path = os.path.join("data", "dataFrames", str(year), day)
+    base_path = os.path.join(PROJECT_ROOT, "data", "dataFrames", str(year), day)
     
         
     if not dataframeExists(day, year, base_path):
