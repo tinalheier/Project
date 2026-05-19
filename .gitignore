@@ -1,6 +1,6 @@
 __pycache__/
 Backend/__pycache__/
-Backend/data/
+Backend/data/DTM_nasjonal/
 .env
 *.pyc
 cookies.txt
