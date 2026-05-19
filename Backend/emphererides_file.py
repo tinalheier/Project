@@ -4,7 +4,10 @@ import os
 from broadcastDownload import download
 from datetime import datetime
 
-df_folder = "data/dataFrames/"
+BASE_DIR = os.path.dirname(os.path.abspath(__file__)) 
+PROJECT_ROOT = os.path.dirname(BASE_DIR) 
+
+df_folder = os.path.join(PROJECT_ROOT, "data", "dataFrames") 
 os.makedirs(df_folder, exist_ok=True)
 
 def get_ephemerides(day, year):
