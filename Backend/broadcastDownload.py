@@ -8,12 +8,18 @@ os.makedirs(folder, exist_ok=True)
 username = os.getenv("EARTHDATA_USERNAME") 
 password = os.getenv("EARTHDATA_PASSWORD")
 
+if not username or not password:
+    raise RuntimeError("Missing EARTHDATA_USERNAME or EARTHDATA_PASSWORD")
+
 netrc_path = "/tmp/.netrc"
 with open(netrc_path, "w") as f: 
-    f.write(f""" 
-machine urs.earthdata.nasa.gov login {username} password {password} """) 
+    f.write(f""" machine urs.earthdata.nasa.gov 
+login {username}
+password {password} 
+""") 
     
 os.chmod(netrc_path, 0o600)
+
 def download(day, year):
 
     day = str(day).zfill(3)
@@ -30,7 +36,7 @@ def download(day, year):
 
     subprocess.run([
         "curl",
-        "-n",
+        "--netrc-file", netrc_path,
         "-L",
         "-c", "cookies.txt",
         "-b", "cookies.txt",
