@@ -13,7 +13,9 @@ from DOPcalculation import designMatrixA
 from emphererides_file import get_ephemerides, load_ephemerides
 
 
-
+BASE_DIR = os.path.dirname(os.path.abspath(__file__)) 
+PROJECT_ROOT = os.path.dirname(BASE_DIR) 
+DTM_FOLDER = os.path.join(PROJECT_ROOT, "data", "DTM_nasjonal")
 #Fra UTM zone 33N til WGS84 Earth-Centered Earth-Fixed (ECEF)
 tf = Transformer.from_crs("EPSG:25833", "EPSG:4978", always_xy=True)
 
@@ -21,7 +23,7 @@ def main(startpunkt, sluttpunkt, day, year, obs_time, maskangle, active_GNSS):
     merged_tif = combine_tifs(
     startpunkt,
     sluttpunkt,
-    folder_path="data/DTM_nasjonal/",
+    folder_path=DTM_FOLDER,
     buffer=10000
 )
     try:
