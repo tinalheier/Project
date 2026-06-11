@@ -36,25 +36,27 @@ This step is a bit tricky, because a .netrc-file has to be created in advance.
      - Windows (WSL/git bash): C:\Users\YourUsername\.netrc or use WSL's ~/.netrc
    - Replace username and password with your Earthdata user
 
+```
       machine urs.earthdata.nasa.gov
       login username
       password password
+```
 
 ## Start project
 
 - Start a terminal
 - Nagivate to the backend folder:
-
-   cd backend
-   pip install -r requirements.txt
-    python app.py
-
+```
+cd backend
+pip install -r requirements.txt
+python app.py
+```
 - Navigate to the frontend folder
 - start a new terminal
 
-
+```
   cd frontend
   npm install
   mpm start
 
-
+```
